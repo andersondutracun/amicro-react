@@ -1,13 +1,59 @@
-.billing{
+/* Billing.module.css */
+
+.billing {
     padding: 80px 5%;
-}
-
-.associacao{
+  }
+  
+  .associacao {
     margin-bottom: 1.5em;
-}
-
-.associacao h2{
     text-align: center;
+  }
+  
+  .associacao h2 {
     color: var(--color_2);
     margin-bottom: 15px;
-}
+  }
+  
+  .pagamentos {
+    margin-top: 2em;
+  }
+  
+  .tabelaPagamentos {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .tabelaPagamentos th,
+  .tabelaPagamentos td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+    text-align: center;
+  }
+  
+  .tabelaPagamentos th {
+    background-color: var(--color_2);
+    color: white;
+  }
+  
+  .tabelaPagamentos tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+  
+  .tabelaPagamentos tbody tr:hover {
+    background-color: #ddd;
+  }
+  
+  .tabelaPagamentos button {
+    margin: auto;
+    padding: 8px 16px;
+    cursor: pointer;
+    border: none;
+    background-color: var(--color_2);
+    color: white;
+    border-radius: 5px;
+  }
+  
+  .tabelaPagamentos button:hover {
+    background-color: #004080;
+  }
+  

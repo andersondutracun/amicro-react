@@ -1,10 +1,15 @@
 import React from 'react'
 import styles from './Business.module.css'
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useAuthValue } from '../../context/AuthContext';
+import { useFetchDocument } from '../../hooks/useFetchDocument';
+import { db } from '../../firebase/config';
 
 const Business = () => {
-
+  const { user } = useAuthValue();
+  const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid);
+  
   const [empresa, setEmpresa] = useState({
     cnpj: '',
     nomeFantasia: '',
@@ -28,6 +33,33 @@ const Business = () => {
     setorAtuacao: ''
 });
 
+useEffect(() => {
+  if (userData) {
+    setEmpresa({
+      cnpj: userData.empresa.cnpj || '',
+      nomeFantasia: userData.empresa.nomeFantasia || '',
+      razaoSocial: userData.empresa.razaoSocial || '',
+      inscricaoEstadual: userData.empresa.inscricaoEstadual || '',
+      tipoLogradouro: userData.empresa.tipoLogradouro || '',
+      endereco: userData.empresa.endereco || '',
+      numero: userData.empresa.numero || '',    
+      complemento: userData.empresa.complemento || '',
+      bairro: userData.empresa.bairro || '',
+      cidade: userData.empresa.cidade || '',
+      cep: userData.empresa.cep || '',
+      uf: userData.empresa.uf || '',
+      telefone: userData.empresa.telefone || '', 
+      site: userData.empresa.site || '',
+      email: userData.empresa.email || '',
+      ramoAtividade: userData.empresa.ramoAtividade || '',
+      dataFundacao: userData.empresa.dataFundacao || '',
+      numFuncionarios: userData.empresa.numFuncionarios || '',
+      porteEmpresa: userData.empresa.porteEmpresa || '',
+      setorAtuacao: userData.empresa.setorAtuacao || ''
+    });
+  }
+}, [userData]);
+
 const handleEmpresaChange = (e) => {
   const { name, value } = e.target;
   setEmpresa(prevEmpresa => ({
@@ -36,43 +68,6 @@ const handleEmpresaChange = (e) => {
   }));
 };
 
-const handleConsultaCNPJ = async () => {
-  try {
-      const response = await axios.get(`https://brasilapi.com.br/api/cnpj/v1/${empresa.cnpj}`);
-      const data = response.data;
-
-      const dataFormatada = formatarData(data.data_inicio_atividade);
-
-      // Atualiza o estado com os dados retornados da API
-      setEmpresa(prevEmpresa => ({
-          ...prevEmpresa,
-          nomeFantasia: data.nome_fantasia,
-          razaoSocial: data.razao_social,
-          tipoLogradouro: data.descricao_tipo_de_logradouro,
-          endereco: data.logradouro,
-          numero: data.numero,
-          complemento: data.complemento,
-          bairro: data.bairro,
-          cep: data.cep,
-          cidade: data.municipio,
-          estado: data.uf,
-          telefone: data.ddd_telefone_1,
-          ramoAtividade: data.cnae_fiscal_descricao,
-          dataFundacao: dataFormatada,
-
-          // Outros campos de interesse
-          //cnpj: formatCnpj(empresa.cnpj)
-      }));
-  } catch (error) {
-      console.error('Erro ao consultar CNPJ:', error);
-  }
-};
-
-const formatarData = (data) => {
-  // Formata a data para DD/MM/AAAA
-  const partes = data.split('-');
-  return `${partes[2]}/${partes[1]}/${partes[0]}`;
-};
 
   return (
     <div className={styles.container}>
@@ -80,12 +75,11 @@ const formatarData = (data) => {
       <form>
       <h2>Dados da Empresa</h2>
                 <div className={styles.cnpjRow}>
-                  <input type="text" name="cnpj" value={empresa.cnpj} onChange={handleEmpresaChange} placeholder="CNPJ" />
-                  <button type="button" onClick={handleConsultaCNPJ}>Preencher automaticamente</button>
+                  <input type="text" name="cnpj" value={empresa.cnpj} onChange={handleEmpresaChange} placeholder="CNPJ" disabled/>
                 </div>
                 <div className={styles.formRow}>
                   <input type="text" name="nomeFantasia" value={empresa.nomeFantasia} onChange={handleEmpresaChange} placeholder="Nome Fantasia" />
-                  <input type="text" name="razaoSocial" value={empresa.razaoSocial} onChange={handleEmpresaChange} placeholder="Razão Social" />
+                  <input type="text" name="razaoSocial" value={empresa.razaoSocial} onChange={handleEmpresaChange} placeholder="Razão Social" disabled/>
                   <input type="text" name="inscricaoEstadual" value={empresa.inscricaoEstadual} onChange={handleEmpresaChange} placeholder="Inscrição Estadual" />
                   <input type="text" name="tipoLogradouro" value={empresa.tipoLogradouro} onChange={handleEmpresaChange} placeholder="Tipo de Logradouro (Rua, Alameda, Avenida)" />
                   <input type="text" name="endereco" value={empresa.endereco} onChange={handleEmpresaChange} placeholder="Endereço" />

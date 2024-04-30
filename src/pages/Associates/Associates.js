@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 import { auth } from '../../firebase/config';
 import { sendPasswordResetEmail } from 'firebase/auth';
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import styles from './Associates.module.css'
 import { useAuthentication } from '../../hooks/useAuthentication';
-import { db } from '../../firebase/config';
 
 const Associates = () => {
   const [email, setEmail] = useState("");
@@ -14,42 +13,43 @@ const Associates = () => {
   const [isPasswordReset, setIsPasswordReset] = useState(false); 
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  const { logout, login, error: authError, loading, resetPassword } = useAuthentication();
+  const { login, error: authError, loading, resetPassword } = useAuthentication();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    try {
-      // Realizar o login com o email e senha fornecidos
-      await login(email, password);
-
-      // Após o login bem-sucedido, verificar se o usuário está ativo
-      const user = auth.currentUser;
-      const empresaDocRef = db.collection("empresas").doc(user.uid);
-      const empresaDoc = await empresaDocRef.get();
-
-      if (empresaDoc.exists) {
-        const empresaData = empresaDoc.data();
-        const ativo = empresaData.ativo;
-
-        if (!ativo) {
-          setError("Usuário não está ativo. Contate o suporte para mais informações.");
-          // Realizar o logout, pois o usuário não está ativo
-          await logout(); // Certifique-se de importar logout do hook useAuthentication
-          return;
+    if (isPasswordReset) {
+      try {
+        await sendPasswordResetEmail(auth, email);
+        console.log("Email de recuperação de senha enviado!");
+        setError(null);
+        // Defina uma mensagem de sucesso
+        setSuccessMessage('Email de recuperação de senha enviado. Verifique sua caixa de entrada.');
+      } catch (error) {
+        if (error.code === "auth/user-not-found") {
+          setError("O email fornecido não está cadastrado. Verifique o email e tente novamente.");
+        } else {
+          setError("Ocorreu um erro ao enviar o email de recuperação de senha. Verifique o email e tente novamente.");
         }
-
-        // Usuário está ativo, redirecionar para a página principal
-       // navigate("/");
-      } else {
-        setError("Informações da empresa não encontradas. Contate o suporte para mais informações.");
-        // Realizar o logout se não encontrou informações da empresa
-        await logout(); // Certifique-se de importar logout do hook useAuthentication
+        setSuccessMessage(null);
       }
-    } catch (error) {
-      setError("Email ou senha incorretos. Por favor, verifique e tente novamente.");
+    } else {
+      const user = {
+        email,
+        password,
+      };
+
+      try {
+        await login(user);
+        setIsAuthenticated(true); // Define como autenticado se o login for bem-sucedido
+        navigate("/");
+      } catch (error) {
+        setError("Email ou senha incorretos. Por favor, verifique e tente novamente.");
+      }
     }
+
   };
 
   return (

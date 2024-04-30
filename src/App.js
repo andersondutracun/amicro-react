@@ -43,6 +43,7 @@ import SideBar from './pages/Profile/SideBar/SideBar';
 import Business from './pages/Business/Business';
 import Partners from './pages/Partners/Partners';
 import Billing from './pages/Billling/Billing';
+import Services from './pages/Services/Services';
 
 
 function App() {
@@ -87,6 +88,7 @@ function App() {
         <Route path='/profile/business' element={<BusinessProfileLayout />} />
         <Route path='/profile/partners' element={<PartnersProfileLayout />} />
         <Route path='/profile/billing' element={<BillingProfileLayout />} />
+        <Route path='/profile/services' element={<ServiceProfileLayout />} />
     
         <Route path="/admin" element={!user ? <Login /> : <Navigate to="/admin/index" />} />
         <Route path='/admin/index' element={user ? <HomeAdmLayout /> : <Navigate to="/admin/"/>} />
@@ -296,6 +298,14 @@ function BillingProfileLayout(){
   return (
     <ProfileLayout>
       <Billing />
+    </ProfileLayout>
+  )
+}
+
+function ServiceProfileLayout(){
+  return (
+    <ProfileLayout>
+      <Services />
     </ProfileLayout>
   )
 }

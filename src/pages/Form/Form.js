@@ -260,7 +260,7 @@ return (
                   <input type="text" name="bairro" value={empresa.bairro} onChange={handleEmpresaChange} placeholder="Bairro" />
                   <input type="text" name="cep" value={empresa.cep} onChange={handleEmpresaChange} placeholder="CEP" />
                   <input type="text" name="cidade" value={empresa.cidade} onChange={handleEmpresaChange} placeholder="Cidade" />
-                  <input type="text" name="estado" value={empresa.estado} onChange={handleEmpresaChange} placeholder="Estado" />
+                  <input type="text" name="estado" value={empresa.uf} onChange={handleEmpresaChange} placeholder="Estado" />
                   <input type="text" name="telefone" value={empresa.telefone} onChange={handleEmpresaChange} placeholder="Telefone" />
                   <input type="text" name="site" value={empresa.site} onChange={handleEmpresaChange} placeholder="Site" />
                   <input type="text" name="email" value={empresa.email} onChange={handleEmpresaChange} placeholder="E-Mail" />

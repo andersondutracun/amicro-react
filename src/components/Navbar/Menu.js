@@ -1,11 +1,7 @@
 import { NavLink } from "react-router-dom";
-
 import { useAuthentication } from "../../hooks/useAuthentication";
-
 import { useAuthValue } from "../../context/AuthContext";
-
 import { useNavigate } from "react-router-dom";
-
 import styles from "./Menu.module.css";
 
 const Menu = () => {
@@ -15,10 +11,11 @@ const Menu = () => {
 
     const navigate = useNavigate();
 
+
     const handleLogout = () => {
         logout();
         navigate('/');
-    }
+    };
     
   return (
     <nav className={styles.navbar}>
@@ -58,7 +55,7 @@ const Menu = () => {
              {user && (
                 
                 <li>
-                    <button className={styles.btn} onClick={logout}>Sair</button>
+                    <button className={styles.btn} onClick={handleLogout}>Sair</button>
                 </li>
             )} 
             {!user && (

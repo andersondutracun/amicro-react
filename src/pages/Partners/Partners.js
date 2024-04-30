@@ -1,8 +1,12 @@
 import React from 'react'
 import styles from './Partners.module.css'
 import { useState } from 'react';
+import { useAuthValue } from '../../context/AuthContext';
+import { useFetchDocument } from '../../hooks/useFetchDocument';
 
 const Partners = () => {
+  const { user } = useAuthValue();
+  const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid);
 
   const [socios, setSocios] = useState([]);
 

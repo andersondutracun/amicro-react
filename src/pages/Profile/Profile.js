@@ -1,9 +1,14 @@
 import styles from './Profile.module.css'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import axios from 'axios';
+import { useAuthValue } from '../../context/AuthContext';
+import { useFetchDocument } from '../../hooks/useFetchDocument';
+import { db } from '../../firebase/config';
 
 const Profile = () => {
-
+  const { user } = useAuthValue();
+ const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid); // Adicionando '?.' para evitar erro se 'user' for nulo
+  
   const [responsavel, setResponsavel] = useState({
     nomeCompleto: '',
     cpf: '',
@@ -18,7 +23,26 @@ const Profile = () => {
     celular: '',
     email: ''
   });
-  
+
+  useEffect(() => {
+    if (userData) {
+      setResponsavel({
+        nomeCompleto: userData.responsavel.nomeCompleto || '',
+        cpf: userData.responsavel.cpf || '',
+        rg: userData.responsavel.rg || '',
+        orgaoExpedidor: userData.responsavel.orgaoExpedidor || '',
+        cep: userData.responsavel.cep || '',
+        endereco: userData.responsavel.endereco || '',
+        numero: userData.responsavel.numero || '',
+        bairro: userData.responsavel.bairro || '',
+        cidade: userData.responsavel.cidade || '',
+        telefone: userData.responsavel.telefone || '',
+        celular: userData.responsavel.celular || '',
+        email: userData.responsavel.email || ''
+      });
+    }
+  }, [userData]);
+
   const handleResponsavelChange = async (e) => {
     const { name, value } = e.target;
     setResponsavel(prevResponsavel => ({
@@ -45,16 +69,22 @@ const Profile = () => {
   };
 
   return (
+    
     <div className={styles.container}>
     <div className={styles.profiles}> 
       <form>
       <h2>Dados do Responsável</h2>
-        {/* Campos de dados do responsável */}
         <div className={styles.responsavelRow}>
-          <input type="text" name="nomeCompleto" value={responsavel.nomeCompleto} onChange={handleResponsavelChange} placeholder="Nome Completo" />
-          <input type="text" name="cpf" value={responsavel.cpf} onChange={handleResponsavelChange} placeholder="CPF" />
-          <input type="text" name="rg" value={responsavel.rg} onChange={handleResponsavelChange} placeholder="RG" />
-          <input type="text" name="orgaoExpedidor" value={responsavel.orgaoExpedidor} onChange={handleResponsavelChange} placeholder="Orgão Expedidor" />
+            <input
+              type="text"
+              name="nomeCompleto"
+              value={responsavel.nomeCompleto}
+              onChange={handleResponsavelChange}
+              placeholder="Nome Completo" disabled
+            />
+          <input type="text" name="cpf" value={responsavel.cpf} onChange={handleResponsavelChange} placeholder="CPF" disabled/>
+          <input type="text" name="rg" value={responsavel.rg} onChange={handleResponsavelChange} placeholder="RG" disabled/>
+          <input type="text" name="orgaoExpedidor" value={responsavel.orgaoExpedidor} onChange={handleResponsavelChange} placeholder="Orgão Expedidor" disabled/>
           <input type="text" name="cep" value={responsavel.cep} onChange={handleResponsavelChange} placeholder="CEP" />
           <input type="text" name="endereco" value={responsavel.endereco} onChange={handleResponsavelChange} placeholder="Endereço" />
           <input type="text" name="numero" value={responsavel.numero} onChange={handleResponsavelChange} placeholder="Numero" />
@@ -62,7 +92,7 @@ const Profile = () => {
           <input type="text" name="cidade" value={responsavel.cidade} onChange={handleResponsavelChange} placeholder="Cidade" />
           <input type="text" name="telefone" value={responsavel.telefone} onChange={handleResponsavelChange} placeholder="Telefone" />
           <input type="text" name="celular" value={responsavel.celular} onChange={handleResponsavelChange} placeholder="Celular" />
-          <input type="text" name="email" value={responsavel.email} onChange={handleResponsavelChange} placeholder="E-Mail" />
+          <input type="text" name="email" value={responsavel.email} onChange={handleResponsavelChange} placeholder="E-Mail" disabled/>
         </div>
       </form>
     </div>
