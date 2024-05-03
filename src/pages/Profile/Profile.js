@@ -7,7 +7,7 @@ import { db } from '../../firebase/config';
 
 const Profile = () => {
   const { user } = useAuthValue();
- const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid); // Adicionando '?.' para evitar erro se 'user' for nulo
+ const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid);
   
   const [responsavel, setResponsavel] = useState({
     nomeCompleto: '',
