@@ -1,0 +1,5 @@
+.admin-container{
+    display: flex;
+    flex-direction: columns;
+    height: 100vh;
+}

@@ -5,12 +5,14 @@ import { useAuthValue } from '../../../context/AuthContext'
 const HomeAdm = () => {
 
   const { user } = useAuthValue();
-
+  console.log(user)
   return (
-    <div className={styles.homeadm}>
-      <h1>Olá </h1>
+    
+    <aside className={styles.homeadm}>
+      
+      {user && <h1>Olá </h1>}
       <p>Seja bem vindo ao painel da Amicro</p>
-    </div>
+    </aside>
   )
 }
 

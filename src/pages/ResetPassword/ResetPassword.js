@@ -1,14 +1,13 @@
-import styles from "./Login.module.css";
+import styles from "./ResetPassword.module.css";
 
 import { useEffect, useState } from "react";
-import { useAuthentication } from "../../../hooks/useAuthentication";
+import { useAuthentication } from "../../hooks/useAuthentication";
 import { NavLink } from 'react-router-dom'
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-import logo from "../../../images/logo.png"
-import logo2 from "../../../images/logo_3.png"
+import logo from "../../images/logo.png"
 
-const Login = () => {
+const ResetPassword = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -45,13 +44,13 @@ const Login = () => {
   return (
   <>
     <div className={styles.login}>
-    <img className={styles.logo} src={logo} alt="Logo" />
+    <img  className={styles.logo} src={logo} alt="Logo" />
       <div className={styles.panel}>       
         <div className={styles.form}>
           <div className={styles.forms}>
             <div className={styles.sets}>
               <div className={styles.title}>
-                <h4>Entrar</h4>
+                <h4>Recuperar senha</h4>
               </div>
               <form onSubmit={handleSubmit}>
                 <div className={styles.stack}>
@@ -68,35 +67,7 @@ const Login = () => {
                       </fieldset>
                     </div>
                   </div>
-                  <div className={styles.stacklogin}>
-                    <label className={styles.stackloginlabel}>
-                        Senha
-                    </label>
-                    <div className={styles.stackpasswordinput}>
-                      <input type={showPassword? 'text' : 'password'} className={styles.formemail}name="password" required onChange={(e) => setPassword(e.target.value)} value={password} />
-                      {showPassword ? (
-                        <FaEye
-                        onClick={togglePasswordVisibility}
-                        className={`${styles.passwordIcon} ${styles.hidden}`}
-                      />    
-                        ) : (
-                          <FaEyeSlash
-                          onClick={togglePasswordVisibility}
-                          className={`${styles.passwordIcon} ${styles.visible}`}
-                        />
-                        )}
-                      <fieldset aria-hidden="true" className={styles.outline}>
-                        <legend className={styles.legendOutline}>
-                          <span>Senha</span>
-                        </legend>
-                      </fieldset>
-                    </div>
-                  </div>
-                  <div>
-                    <NavLink className={styles.resetpassword} to="/user/resetpassword">
-                      Esqueceu sua senha?
-                    </NavLink>
-                  </div>
+                 
                   {!loading && <button className={styles.button} onClick={handleSubmit}>Entrar</button>}
                   {loading && (<button className={styles.button} disabled>Aguarde... </button>
                 )}
@@ -112,6 +83,6 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default ResetPassword;
 
 

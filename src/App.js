@@ -44,6 +44,8 @@ import Business from './pages/Business/Business';
 import Partners from './pages/Partners/Partners';
 import Billing from './pages/Billling/Billing';
 import Services from './pages/Services/Services';
+import ResetPassword from './pages/ResetPassword/ResetPassword';
+import AdminSidebar from './components/AdminSidebar';
 
 
 function App() {
@@ -89,6 +91,7 @@ function App() {
         <Route path='/profile/partners' element={<PartnersProfileLayout />} />
         <Route path='/profile/billing' element={<BillingProfileLayout />} />
         <Route path='/profile/services' element={<ServiceProfileLayout />} />
+        <Route path='/user/resetpassword' element={<ResetPassword />} />
     
         <Route path="/admin" element={!user ? <Login /> : <Navigate to="/admin/index" />} />
         <Route path='/admin/index' element={user ? <HomeAdmLayout /> : <Navigate to="/admin/"/>} />
@@ -313,8 +316,9 @@ function ServiceProfileLayout(){
 function AdminLayout({ children }) {
   return (
     <>
-      <AdminNavbar />
+    <AdminNavbar />
       <div className="admin-container">
+        <AdminSidebar />
         {children}
       </div>
     </>
