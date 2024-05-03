@@ -316,10 +316,12 @@ function ServiceProfileLayout(){
 function AdminLayout({ children }) {
   return (
     <>
-    <AdminNavbar />
       <div className="admin-container">
         <AdminSidebar />
-        {children}
+        <div className='admin-content'>
+          <AdminNavbar/>
+          {children}
+        </div>
       </div>
     </>
   );
