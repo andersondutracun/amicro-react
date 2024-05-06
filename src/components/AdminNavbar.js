@@ -29,21 +29,26 @@ export default function AdminNavbar() {
   
   return (
     <React.Fragment>
-      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', textAlign: 'center', marginRight: '30px' }}>
-        {/* Botão de Notificações */}
+      <Box sx={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          textAlign: 'center',
+          marginRight: '30px',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.12)',
+          width: '100%',
+          zIndex: '999'
+        }}>
         <Tooltip title="Notificações">
-  <IconButton size="small" sx={{ ml: 2 }}>
-    <NotificationsIcon />
-  </IconButton>
-</Tooltip>
-        {/* Botão de Usuários */}
+          <IconButton size="small" sx={{ ml: 2 }}>
+            <NotificationsIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Contatos">
-  <IconButton size="small">
-    <PeopleAltIcon />
-  </IconButton>
-</Tooltip>
-        
-        {/* Botão de Perfil com Tooltip */}
+          <IconButton size="small">
+            <PeopleAltIcon />
+          </IconButton>
+        </Tooltip>
         <Tooltip title="Account settings">
           <IconButton
             onClick={handleClick}

@@ -9,7 +9,7 @@ const sidebarNavItems = [
     {
         display: 'Dashboard',
         icon: <DashboardIcon/>,
-        to: '/admin/dashboard',
+        to: '/admin/index',
         section: ''
     },
     {

@@ -204,19 +204,16 @@ app.post('/user/createUserAndEmpresa', async (req, res) => {
   const { email, password, role, confirmPassword, empresa, responsavel, socios, taxaAssociacao, servicosInteresse, outrosServicos, ativo } = req.body;
 
   try {
-    // Verificar se as senhas coincidem
     if (password !== confirmPassword) {
       return res.status(400).json({ error: "As senhas precisam ser iguais!" });
     }
 
-    // Criar usuário no Firebase Authentication
     const user = await admin.auth().createUser({
       email,
       password,
       role
     });
 
-    // Criar objeto com os dados da empresa
     const empresaData = {
       uid: user.uid,
       empresa,
@@ -226,7 +223,6 @@ app.post('/user/createUserAndEmpresa', async (req, res) => {
       ativo
     };
 
-    // Verificar se socios está definido e não é vazio
     if (socios && socios.length > 0) {
       empresaData.socios = socios;
     }
@@ -235,7 +231,6 @@ app.post('/user/createUserAndEmpresa', async (req, res) => {
       empresaData.outrosServicos = outrosServicos;
     }
 
-    // Inserir dados da empresa no Firestore
     await admin.firestore().collection('empresas').doc(user.uid).set(empresaData);
 
     res.status(201).json({ message: 'Usuário e dados da empresa criados com sucesso!' });
@@ -245,7 +240,103 @@ app.post('/user/createUserAndEmpresa', async (req, res) => {
   }
 });
 
+app.get('/countUsers', async (req, res) => {
+  try {
+    const userRecords = await admin.auth().listUsers();
+    const userCount = userRecords.users.length;
+
+    res.json({ userCount });
+  } catch (error) {
+    console.error('Erro ao contar usuários autenticados:', error);
+    res.status(500).json({ error: 'Erro ao contar usuários autenticados' });
+  }
+});
+
+app.get('/countNews', async (req, res) => {
+  try {
+    const newsRef = db.collection('news');
+    const snapshot = await newsRef.get();
+    const newsCount = snapshot.size; 
+
+    res.json({ newsCount });
+  } catch (error) {
+    console.error('Erro ao contar as postagens de notícias:', error);
+    res.status(500).json({ error: 'Erro ao contar as postagens de notícias' });
+  }
+});
+
+app.get('/countMaterials', async (req, res) => {
+  try {
+    const materialsRef = db.collection('materials');
+    const snapshot = await materialsRef.get();
+    const materialsCount = snapshot.size; // Tamanho da coleção (número de documentos)
+
+    res.json({ materialsCount });
+  } catch (error) {
+    console.error('Erro ao contar os materiais:', error);
+    res.status(500).json({ error: 'Erro ao contar os materiais' });
+  }
+});
+
+app.post('/admin/monthlyPayments', async (req, res) => {
+  const { year, month } = req.body; // Ano e mês dos pagamentos a serem calculados
+
+  try {
+    // Consultar os pagamentos do mês e ano especificados
+    const paymentsRef = collection(db, 'payments');
+    const q = query(
+      paymentsRef,
+      where('payment', '==', true), // Considerar apenas pagamentos confirmados
+      where('year', '==', year), // Filtrar pelo ano especificado
+      where('month', '==', month) // Filtrar pelo mês especificado
+    );
+    const snapshot = await getDocs(q);
+
+    let totalPayments = 0;
+
+    snapshot.forEach((doc) => {
+      const payment = doc.data();
+      totalPayments += payment.value;
+    });
+
+    const monthlyPaymentsDocRef = doc(db, 'monthlyPayments', `${year}-${month}`);
+    await setDoc(monthlyPaymentsDocRef, {
+      year,
+      month,
+      totalPayments,
+    });
+
+    res.status(200).json({ message: `Pagamentos do mês ${month}/${year} calculados e salvos com sucesso.` });
+  } catch (error) {
+    console.error('Erro ao calcular e salvar os pagamentos mensais:', error);
+    res.status(500).json({ error: 'Erro ao calcular e salvar os pagamentos mensais' });
+  }
+});
+
+app.get('/countViews', async (req, res) => {
+  try {
+    const viewsSnapshot = await db.collection('views').get();
+    const totalViews = viewsSnapshot.size;
+    res.json({ viewCount: totalViews });
+  } catch (error) {
+    console.error('Erro ao contar visualizações:', error);
+    res.status(500).json({ error: 'Erro ao contar visualizações' });
+  }
+});
+
+app.post('/recordView', async (req, res) => {
+  try {
+    const viewsRef = db.collection('views');
+    await viewsRef.add({ timestamp: new Date() });
+    res.status(200).send('Visualização registrada com sucesso!');
+  } catch (error) {
+    console.error('Erro ao registrar visualização:', error);
+    res.status(500).json({ error: 'Erro ao registrar visualização' });
+  }
+});
 
 app.listen(3001, () => {
   console.log('Servidor rodando na porta 3001');
 });
+
+

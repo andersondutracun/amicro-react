@@ -95,7 +95,7 @@ function App() {
     
         <Route path="/admin" element={!user ? <Login /> : <Navigate to="/admin/index" />} />
         <Route path='/admin/index' element={user ? <HomeAdmLayout /> : <Navigate to="/admin/"/>} />
-        <Route path='/admin/dashboard' element={user ? <DashboardLayout /> : <Navigate to="/admin/"/>} />
+        <Route path='/admin/postlist' element={user ? <DashboardLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost' element={user ? <CreatePostLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/creatematerials' element={user ? <CreateMaterialsLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/createnewsletter' element={user ? <CreateNewsletterLayout /> : <Navigate to="/admin/"/>} />

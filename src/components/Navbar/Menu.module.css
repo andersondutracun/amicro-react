@@ -1,9 +1,9 @@
-.links_list{
+.links_list {
     display: flex;
     justify-content: space-evenly;
 }
 
-.links_list li{
+.links_list li {
     list-style: none;
 }
 
@@ -11,32 +11,34 @@
     background-color: var(--color_2);
     color: #fff;
     border-radius: 4px;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.links_list a{
+.links_list a {
     text-decoration: none;
     padding: 15px;
     border-bottom: 1px solid var(--color_2);
     display: block;
     text-transform: uppercase;
-}
-
-.active:hover {
-    background-color: var(--color_2);
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .links_list a:hover {
     background-color: var(--color_5);
+    transition: background-color 0.3s ease;
 }
 
-.btn{
+.btn {
     padding: 15px;
     border-bottom: 1px solid var(--color_2);
     font-size: 1em;
     color: #000;
     cursor: pointer;
+    text-transform: uppercase;
+    transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.btn:hover{
+.btn:hover {
     background-color: var(--color_5);
+    transition: background-color 0.3s ease;
 }

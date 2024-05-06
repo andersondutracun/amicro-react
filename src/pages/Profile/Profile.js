@@ -1,15 +1,14 @@
-import styles from './Profile.module.css'
-import { useEffect, useState } from 'react';
-import axios from 'axios';
+import * as React from 'react';
+import { Typography, TextField, Grid, Paper } from '@mui/material';
 import { useAuthValue } from '../../context/AuthContext';
 import { useFetchDocument } from '../../hooks/useFetchDocument';
-import { db } from '../../firebase/config';
+import axios from 'axios';
 
 const Profile = () => {
   const { user } = useAuthValue();
- const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid);
-  
-  const [responsavel, setResponsavel] = useState({
+  const { document: userData, loading, error } = useFetchDocument('empresas', user?.uid);
+
+  const [responsavel, setResponsavel] = React.useState({
     nomeCompleto: '',
     cpf: '',
     rg: '',
@@ -24,7 +23,7 @@ const Profile = () => {
     email: ''
   });
 
-  useEffect(() => {
+  React.useEffect(() => {
     if (userData) {
       setResponsavel({
         nomeCompleto: userData.responsavel.nomeCompleto || '',
@@ -45,60 +44,148 @@ const Profile = () => {
 
   const handleResponsavelChange = async (e) => {
     const { name, value } = e.target;
-    setResponsavel(prevResponsavel => ({
-        ...prevResponsavel,
-        [name]: value
+    setResponsavel((prevResponsavel) => ({
+      ...prevResponsavel,
+      [name]: value
     }));
-  
+
     if (name === 'cep' && value.length === 8) {
       try {
-          const response = await axios.get(`https://viacep.com.br/ws/${value}/json/`);
-          const data = response.data;
-  
-          // Atualiza o estado com os dados retornados do ViaCEP
-          setResponsavel(prevResponsavel => ({
-              ...prevResponsavel,
-              endereco: data.logradouro,
-              bairro: data.bairro,
-              cidade: data.localidade
-          }));
+        const response = await axios.get(`https://viacep.com.br/ws/${value}/json/`);
+        const data = response.data;
+
+        // Atualiza o estado com os dados retornados do ViaCEP
+        setResponsavel((prevResponsavel) => ({
+          ...prevResponsavel,
+          endereco: data.logradouro,
+          bairro: data.bairro,
+          cidade: data.localidade
+        }));
       } catch (error) {
-          console.error('Erro ao consultar CEP:', error);
+        console.error('Erro ao consultar CEP:', error);
       }
-  }
+    }
   };
 
   return (
-    
-    <div className={styles.container}>
-    <div className={styles.profiles}> 
-      <form>
-      <h2>Dados do Responsável</h2>
-        <div className={styles.responsavelRow}>
-            <input
-              type="text"
-              name="nomeCompleto"
+    <div style={{ padding: '20px' }}>
+      <Paper elevation={3} style={{ padding: '20px' }}>
+        <Typography variant="h5" gutterBottom>
+          Dados do Responsável
+        </Typography>
+        <Grid container spacing={2}>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Nome Completo"
+              variant="outlined"
+              fullWidth
               value={responsavel.nomeCompleto}
-              onChange={handleResponsavelChange}
-              placeholder="Nome Completo" disabled
+              disabled
             />
-          <input type="text" name="cpf" value={responsavel.cpf} onChange={handleResponsavelChange} placeholder="CPF" disabled/>
-          <input type="text" name="rg" value={responsavel.rg} onChange={handleResponsavelChange} placeholder="RG" disabled/>
-          <input type="text" name="orgaoExpedidor" value={responsavel.orgaoExpedidor} onChange={handleResponsavelChange} placeholder="Orgão Expedidor" disabled/>
-          <input type="text" name="cep" value={responsavel.cep} onChange={handleResponsavelChange} placeholder="CEP" />
-          <input type="text" name="endereco" value={responsavel.endereco} onChange={handleResponsavelChange} placeholder="Endereço" />
-          <input type="text" name="numero" value={responsavel.numero} onChange={handleResponsavelChange} placeholder="Numero" />
-          <input type="text" name="bairro" value={responsavel.bairro} onChange={handleResponsavelChange} placeholder="Bairro" />
-          <input type="text" name="cidade" value={responsavel.cidade} onChange={handleResponsavelChange} placeholder="Cidade" />
-          <input type="text" name="telefone" value={responsavel.telefone} onChange={handleResponsavelChange} placeholder="Telefone" />
-          <input type="text" name="celular" value={responsavel.celular} onChange={handleResponsavelChange} placeholder="Celular" />
-          <input type="text" name="email" value={responsavel.email} onChange={handleResponsavelChange} placeholder="E-Mail" disabled/>
-        </div>
-      </form>
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="CPF"
+              variant="outlined"
+              fullWidth
+              value={responsavel.cpf}
+              disabled
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="RG"
+              variant="outlined"
+              fullWidth
+              value={responsavel.rg}
+              disabled
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Orgão Expedidor"
+              variant="outlined"
+              fullWidth
+              value={responsavel.orgaoExpedidor}
+              disabled
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="CEP"
+              variant="outlined"
+              fullWidth
+              value={responsavel.cep}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={8}>
+            <TextField
+              label="Endereço"
+              variant="outlined"
+              fullWidth
+              value={responsavel.endereco}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={4}>
+            <TextField
+              label="Número"
+              variant="outlined"
+              fullWidth
+              value={responsavel.numero}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Bairro"
+              variant="outlined"
+              fullWidth
+              value={responsavel.bairro}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Cidade"
+              variant="outlined"
+              fullWidth
+              value={responsavel.cidade}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Telefone"
+              variant="outlined"
+              fullWidth
+              value={responsavel.telefone}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12} sm={6}>
+            <TextField
+              label="Celular"
+              variant="outlined"
+              fullWidth
+              value={responsavel.celular}
+              onChange={handleResponsavelChange}
+            />
+          </Grid>
+          <Grid item xs={12}>
+            <TextField
+              label="E-Mail"
+              variant="outlined"
+              fullWidth
+              value={responsavel.email}
+              disabled
+            />
+          </Grid>
+        </Grid>
+      </Paper>
     </div>
-    </div>
+  );
+};
 
-  )
-}
-
-export default Profile
+export default Profile;
