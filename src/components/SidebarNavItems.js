@@ -24,11 +24,11 @@ const sidebarNavItems = [
             },
             {
                 display: 'Postar Noticia',
-                to: 'admin/createpost/createnewsletter'
+                to: '/admin/createpost/createnewsletter'
             },
             {
                 display: 'Postar Material',
-                to: 'admin/createpost/creatematerials'
+                to: '/admin/createpost/creatematerials'
             },            
         ]
     },

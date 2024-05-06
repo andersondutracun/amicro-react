@@ -1,155 +1,225 @@
-import { useState } from "react";
-import styles from "./Dashboard.module.css";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import { useAuthValue } from "../../../context/AuthContext";
 import { useFetchDocuments } from "../../../hooks/useFetchDocuments";
 import { useDeleteDocument } from "../../../hooks/useDeleteDocment";
+import styled from "styled-components";
+import {
+  Container,
+  Typography,
+  CircularProgress,
+  Paper,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+} from "@mui/material";
+
+const SectionPaper = styled(Paper)`
+  padding: 20px;
+  margin-bottom: 20px;
+`;
+
+const CardContainer = styled.div`
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+`;
+
+const CardContent = styled.div`
+  flex: 1;
+`;
+
+const PageButton = styled(Button)`
+  && {
+    margin-right: 5px;
+    color: ${(props) => (props.current ? "#fff" : "#000")};
+    background-color: ${(props) => (props.current ? "#007bff" : "transparent")};
+
+    &:hover {
+      background-color: ${(props) => (props.current ? "#007bff" : "#f0f0f0")};
+    }
+  }
+`;
 
 const Dashboard = () => {
   const { user } = useAuthValue();
-
   const [currentPageMaterials, setCurrentPageMaterials] = useState(1);
   const [currentPageNews, setCurrentPageNews] = useState(1);
+  const [deleteConfirmation, setDeleteConfirmation] = useState(null); // State para controlar o modal de confirmação
   const itemsPerPage = 5;
 
-  // Para a coleção "materials"
   const { documents: materials, loading: materialsLoading } = useFetchDocuments("materials");
   const { deleteDocument: deleteMaterial } = useDeleteDocument("materials");
 
-  // Para a coleção "news"
   const { documents: news, loading: newsLoading } = useFetchDocuments("news");
   const { deleteDocument: deleteNews } = useDeleteDocument("news");
+
+  const currentMaterials =
+    materials && materials.length > 0 ? materials.slice((currentPageMaterials - 1) * itemsPerPage, currentPageMaterials * itemsPerPage) : [];
+
+  const currentNews =
+    news && news.length > 0 ? news.slice((currentPageNews - 1) * itemsPerPage, currentPageNews * itemsPerPage) : [];
 
   const paginateMaterials = (pageNumber) => setCurrentPageMaterials(pageNumber);
   const paginateNews = (pageNumber) => setCurrentPageNews(pageNumber);
 
-  const indexOfLastMaterial = currentPageMaterials * itemsPerPage;
-  const indexOfFirstMaterial = indexOfLastMaterial - itemsPerPage;
-  const currentMaterials = materials && materials.slice(indexOfFirstMaterial, indexOfLastMaterial);
+  const handleDeleteConfirmation = (item) => {
+    setDeleteConfirmation(item);
+  };
 
-  const indexOfLastNews = currentPageNews * itemsPerPage;
-  const indexOfFirstNews = indexOfLastNews - itemsPerPage;
-  const currentNews = news && news.slice(indexOfFirstNews, indexOfLastNews);
+  const handleConfirmDelete = () => {
+    if (deleteConfirmation) {
+      if (deleteConfirmation.type === "material") {
+        deleteMaterial(deleteConfirmation.id);
+      } else if (deleteConfirmation.type === "news") {
+        deleteNews(deleteConfirmation.id);
+      }
+    }
+    setDeleteConfirmation(null);
+  };
+
+  const handleCloseModal = () => {
+    setDeleteConfirmation(null);
+  };
 
   return (
-    <div className='section'>
-      <div className='header'>
-        <div className='container'>
-          <div className='banner'>
-            <h1>Dashboard</h1>
-            <p>Gerencia todas as postagems feitas no site.</p>
-          </div>
-        </div>
-      </div>
+    <Container maxWidth="xl" style={{ marginTop: 20 }}>
+      <Typography variant="h4" gutterBottom>
+        Lista de Postagens
+      </Typography>
+      <Typography variant="body1" paragraph>
+        Gerencie todas as postagens feitas no site.
+      </Typography>
 
       {/* Materiais */}
-      <div className={styles.page}>
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Materiais</h3>
-        <div className={styles.post_header}>
-          <span>Título</span>
-          <span>Criador</span>
-          <span>Ações</span>
-        </div>
+      <SectionPaper elevation={3}>
+        <Typography variant="h5" gutterBottom>
+          Materiais ({materials ? materials.length : 0} postagens)
+        </Typography>
         {materialsLoading ? (
-          <p>Carregando...</p>
+          <CircularProgress />
         ) : (
           <>
-            {currentMaterials && currentMaterials.length > 0 ? (
+            {currentMaterials.length > 0 ? (
               currentMaterials.map((material) => (
-                <div className={styles.post_row} key={material.id}>
-                  <p>{material.title}</p>
-                  <p>{material.createdBy}</p>
-                  <div className={styles.actions}>
-                    <Link to={`/posts/${material.id}`} className="btn btn-outline">
+                <CardContainer key={material.id}>
+                  <CardContent>
+                    <Typography variant="subtitle1">{material.title}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Criador: {material.createdBy}
+                    </Typography>
+                  </CardContent>
+                  <div>
+                    <Button component={Link} to={`/posts/${material.id}`} variant="outlined" color="primary">
                       Ver
-                    </Link>
-                    <Link to={`/posts/edit/${material.id}`} className="btn btn-outline">
+                    </Button>
+                    <Button component={Link} to={`/posts/edit/${material.id}`} variant="outlined">
                       Editar
-                    </Link>
-                    <button
-                      onClick={() => deleteMaterial(material.id)}
-                      className="btn btn-outline btn-danger"
-                    >
+                    </Button>
+                    <Button variant="outlined" color="error" onClick={() => handleDeleteConfirmation({ id: material.id, type: "material", title: material.title, createdBy: material.createdBy })}>
                       Excluir
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </CardContainer>
               ))
             ) : (
-              <div className={styles.noposts}>
-                <p>Não foram encontrados materiais</p>
+              <Typography variant="body1">Não foram encontrados materiais</Typography>
+            )}
+            {/* Paginação para materiais */}
+            {materials && materials.length > itemsPerPage && (
+              <div style={{ marginTop: "20px" }}>
+                {Array.from({ length: Math.ceil(materials.length / itemsPerPage) }, (_, i) => (
+                  <PageButton
+                    key={i + 1}
+                    variant="outlined"
+                    current={i + 1 === currentPageMaterials}
+                    onClick={() => paginateMaterials(i + 1)}
+                  >
+                    {i + 1}
+                  </PageButton>
+                ))}
               </div>
             )}
-            <div className={styles.pagination}>
-              <ul className={styles.pageNumbers}>
-                {materials && materials.length > 0 &&
-                  Array.from({ length: Math.ceil(materials.length / itemsPerPage) }, (_, i) => (
-                    <li key={i} className={currentPageMaterials === i + 1 ? styles.active : null}>
-                      <button onClick={() => paginateMaterials(i + 1)}>{i + 1}</button>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
           </>
         )}
-      </div>
+      </SectionPaper>
 
       {/* Notícias */}
-      <div className={styles.section}>
-        <h3 className={styles.sectionTitle}>Notícias</h3>
-        <div className={styles.post_header}>
-          <span>Título</span>
-          <span>Criador</span>
-          <span>Ações</span>
-        </div>
+      <SectionPaper elevation={3}>
+        <Typography variant="h5" gutterBottom>
+          Notícias ({news ? news.length : 0} postagens)
+        </Typography>
         {newsLoading ? (
-          <p>Carregando...</p>
+          <CircularProgress />
         ) : (
           <>
-            {currentNews && currentNews.length > 0 ? (
+            {currentNews.length > 0 ? (
               currentNews.map((newsItem) => (
-                <div className={styles.post_row} key={newsItem.id}>
-                  <p>{newsItem.title}</p>
-                  <p>{newsItem.createdBy}</p>
-                  <div className={styles.actions}>
-                    <Link to={`/posts/${newsItem.id}`} className="btn btn-outline">
+                <CardContainer key={newsItem.id}>
+                  <CardContent>
+                    <Typography variant="subtitle1">{newsItem.title}</Typography>
+                    <Typography variant="body2" color="textSecondary">
+                      Criador: {newsItem.createdBy}
+                    </Typography>
+                  </CardContent>
+                  <div>
+                    <Button component={Link} to={`/newsletter/post/${newsItem.id}`} variant="outlined" color="primary">
                       Ver
-                    </Link>
-                    <Link to={`/posts/edit/${newsItem.id}`} className="btn btn-outline">
+                    </Button>
+                    <Button component={Link} to={`/posts/edit/${newsItem.id}`} variant="outlined">
                       Editar
-                    </Link>
-                    <button
-                      onClick={() => deleteNews(newsItem.id)}
-                      className="btn btn-outline btn-danger"
-                    >
+                    </Button>
+                    <Button variant="outlined" color="error" onClick={() => handleDeleteConfirmation({ id: newsItem.id, type: "news", title: newsItem.title, createdBy: newsItem.createdBy })}>
                       Excluir
-                    </button>
+                    </Button>
                   </div>
-                </div>
+                </CardContainer>
               ))
             ) : (
-              <div className={styles.noposts}>
-                <p>Não foram encontradas notícias</p>
+              <Typography variant="body1">Não foram encontradas notícias</Typography>
+            )}
+            {/* Paginação para notícias */}
+            {news && news.length > itemsPerPage && (
+              <div style={{ marginTop: "20px" }}>
+                {Array.from({ length: Math.ceil(news.length / itemsPerPage) }, (_, i) => (
+                  <PageButton
+                    key={i + 1}
+                    variant="outlined"
+                    current={i + 1 === currentPageNews}
+                    onClick={() => paginateNews(i + 1)}
+                  >
+                    {i + 1}
+                  </PageButton>
+                ))}
               </div>
             )}
-            <div className={styles.pagination}>
-              <ul className={styles.pageNumbers}>
-                {news && news.length > 0 &&
-                  Array.from({ length: Math.ceil(news.length / itemsPerPage) }, (_, i) => (
-                    <li key={i} className={currentPageNews === i + 1 ? styles.active : null}>
-                      <button onClick={() => paginateNews(i + 1)}>{i + 1}</button>
-                    </li>
-                  ))
-                }
-              </ul>
-            </div>
           </>
         )}
-      </div>
-      </div>
-    </div>
+      </SectionPaper>
+
+      {/* Modal de confirmação */}
+      <Dialog open={Boolean(deleteConfirmation)} onClose={handleCloseModal}>
+        <DialogTitle>Confirmar Exclusão</DialogTitle>
+        <DialogContent>
+          {deleteConfirmation && (
+            <Typography variant="body1">
+              Tem certeza que deseja excluir a postagem <strong>{deleteConfirmation.title}</strong> criada por{" "}
+              <strong>{deleteConfirmation.createdBy}</strong>?
+            </Typography>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handleConfirmDelete} color="error">
+            Excluir
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </Container>
   );
 };
 
