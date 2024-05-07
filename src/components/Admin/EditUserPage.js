@@ -2,6 +2,13 @@ import React, { useState, useEffect, Suspense } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
 import styles from "./EditUserPage.module.css"
+import { Container, Grid, Paper, Typography } from '@mui/material';
+import styled from 'styled-components';
+
+const StyledPaper = styled(Paper)`
+  padding: 20px;
+  margin-bottom: 20px;
+`;
 
 const EditUserPage = () => {
   const { userId } = useParams();
@@ -22,7 +29,7 @@ const EditUserPage = () => {
     const fetchUser = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(`http://179.209.23.75:3001/admin/users/${userId}`);
+        const response = await axios.get(`http://localhost:3001/admin/users/${userId}`);
         setUser(response.data);
         setBirthdate(response.data.birthdate ? new Date(response.data.birthdate).toISOString().split('T')[0] : ''); // Convertendo para o formato 'yyyy-MM-dd'
         setCep(response.data.cep || '');
@@ -61,6 +68,7 @@ const EditUserPage = () => {
       const userData = {
         displayName: user.displayName,
         email: user.email,
+        role: user.role,
         birthdate: new Date(birthdate).toISOString(), // Convertendo para o formato ISO
         cep,
         address,
@@ -71,7 +79,7 @@ const EditUserPage = () => {
         phoneNumber
       };
 
-      await axios.put(`http://179.209.23.75:3001/admin/users/${userId}`, userData);
+      await axios.put(`http://localhost:3001/admin/users/${userId}`, userData);
       alert('Usuário atualizado com sucesso');
     } catch (error) {
       console.error('Erro ao atualizar usuário:', error);
@@ -89,17 +97,16 @@ const EditUserPage = () => {
   }
 
   return (
-    <div>
-        <div className='section'>
-            <div className='header'>
-                <div className='container'>
-                    <div className='banner'>
-                        <h1>Editar Usuário {user.displayName}</h1>
-                    </div>
-                </div>
-            </div>
-        <div className={styles.form_container}>
-            <h2>Editar Usuário</h2>
+    <Container maxWidth="xl" style={{ paddingTop: "20px" }}>
+      <Grid item xs={12}>
+        <Paper elevation={2} style={{ padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: "20px" }}>
+          <Typography variant="h4" gutterBottom>
+            Editar usuário {user.displayName}
+          </Typography>
+        </Paper>
+      </Grid>
+        <StyledPaper elevation={3}>
+          <Typography variant="h5" gutterBottom>Editar Usuário</Typography>
             <label>Nome:
                 <input type="text" value={user.displayName} onChange={e => setDisplayName(e.target.value)} />
             </label>
@@ -132,9 +139,8 @@ const EditUserPage = () => {
             </label>
             <button className='btn' onClick={handleUpdateUser}>Salvar</button>
             <Link className='btn' to='/admin/users'>Voltar</Link>
-        </div>
-    </div>
-    </div>
+        </StyledPaper>
+    </Container>
   );
 };
 

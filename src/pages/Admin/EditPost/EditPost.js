@@ -5,9 +5,7 @@ import { useAuthValue } from '../../../context/AuthContext';
 import { useFetchDocument } from '../../../hooks/useFetchDocument';
 import { useUpdateDocument } from '../../../hooks/useUpdateDocument';
 import styled from 'styled-components';
-import axios from 'axios';
 
-// Estilizando componentes do Material-UI com styled-components
 const StyledPaper = styled(Paper)`
   padding: 20px;
   margin-bottom: 20px;
@@ -72,13 +70,16 @@ const EditPost = () => {
   
       if (title && image && type && preview) {
         try {
+          const editedAt = new Date(); // Obtém a data e hora atuais
           await updateDocument(id, {
             title,
             image,
             type,
-            preview
+            preview,
+            EditedAt: editedAt, // Atualiza o campo EditedAt com o timestamp atual
+            EditedBy: user.displayName
           });
-  
+      
           navigate('/admin/postlist');
         } catch (error) {
           console.error('Erro ao atualizar postagem:', error);

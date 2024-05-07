@@ -63,17 +63,20 @@ const EditMaterials = () => {
 
     if (title && image && type && preview && link) {
       try {
+        const editedAt = new Date(); // Obtém a data e hora atuais
         await updateDocument(id, {
           title,
           image,
           type,
           preview,
-          link
+          link,
+          EditedAt: editedAt, // Atualiza o campo EditedAt com o timestamp atual
+          EditedBy: user.displayName
         });
-
+    
         navigate('/admin/postlist');
       } catch (error) {
-        console.error('Erro ao atualizar material:', error);
+        console.error('Erro ao atualizar postagem:', error);
       }
     } else {
       console.error('Todos os campos são necessários');

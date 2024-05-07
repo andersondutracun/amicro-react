@@ -24,7 +24,6 @@ import Login from './pages/Admin/Login/Login';
 import AdminNavbar from './components/AdminNavbar';
 import HomeAdm from './pages/Admin/HomeAdm/HomeAdm';
 import Dashboard from './pages/Admin/Dashboard/Dashboard';
-import CreatePost from './pages/Admin/CreatePost/CreatePost';
 import CreateNewsletter from './pages/Admin/CreateNewsletter/CreateNewsletter';
 import CreateMaterials from './pages/Admin/CreateMaterials/CreateMaterials';
 import Register from './pages/Admin/Register/Register';
@@ -100,7 +99,6 @@ function App() {
         <Route path='/admin/postlist' element={user ? <DashboardLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/newsletter/post/edit/:id' element={user ? <EditPostLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/materials/post/edit/:id' element={user ? <EditMaterialsLayout /> : <Navigate to="/admin/"/>} />
-        <Route path='/admin/createpost' element={user ? <CreatePostLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/creatematerials' element={user ? <CreateMaterialsLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/createnewsletter' element={user ? <CreateNewsletterLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/users' element={user ? <UsersLayout /> : <Navigate to="/admin/"/>} />
@@ -324,7 +322,7 @@ function AdminLayout({ children }) {
         <AdminSidebar />
         <div className='admin-content'>
           <AdminNavbar/>
-          <div style={{ backgroundColor: "#f0f0f0", height: "100vh" }}>
+          <div style={{ backgroundColor: "#f0f0f0", height: "100vh", overflowY: 'auto' }}>
           {children}
           </div>
         </div>
@@ -348,16 +346,6 @@ function DashboardLayout() {
     <>
     <AdminLayout>
       <Dashboard />
-    </AdminLayout>
-    </>
-  )
-}
-
-function CreatePostLayout() {
-  return(
-    <>
-    <AdminLayout>
-      <CreatePost />
     </AdminLayout>
     </>
   )

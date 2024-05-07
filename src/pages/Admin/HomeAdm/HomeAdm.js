@@ -80,42 +80,28 @@ const HomeAdm = () => {
           <Typography variant="body1">Seja bem-vindo ao painel da Amicro</Typography>
         </Paper>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item sm={3} xs={6}>
         <Paper elevation={3} style={{ padding: 20, backgroundColor: '#ffcc80', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', height: '100%' }}>
           <Typography variant="h6" style={{ marginBottom: 10 }}>Usuários</Typography>
           <Typography variant="h4" style={{ alignSelf: 'flex-end', fontSize: '2em' }}>{userCount}</Typography>
         </Paper>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item sm={3} xs={6}>
         <Paper elevation={3} style={{ padding: 20, backgroundColor: '#90caf9', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', height: '100%' }}>
           <Typography variant="h6" style={{ marginBottom: 10 }}>Notícias Postadas</Typography>
           <Typography variant="h4" style={{ alignSelf: 'flex-end', fontSize: '2em' }}>{newsCount}</Typography>
         </Paper>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item sm={3} xs={6}>
         <Paper elevation={3} style={{ padding: 20, backgroundColor: '#a5d6a7', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', height: '100%' }}>
           <Typography variant="h6" style={{ marginBottom: 10 }}>Materiais Postados</Typography>
           <Typography variant="h4" style={{ alignSelf: 'flex-end', fontSize: '2em' }}>{materialsCount}</Typography>
         </Paper>
       </Grid>
-      <Grid item xs={3}>
+      <Grid item sm={3} xs={6}>
         <Paper elevation={3} style={{ padding: 20, backgroundColor: '#00ff00', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'space-between', height: '100%' }}>
           <Typography variant="h6" style={{ marginBottom: 10, textAlign: 'left' }}>Visualizações:</Typography>
           <Typography variant="h4" style={{ alignSelf: 'flex-end' }}>{viewCount}</Typography>
-        </Paper>
-      </Grid>
-      <Grid item xs={12}>
-        <Paper elevation={3} style={{ padding: 20 }}>
-          <Typography variant="h6">Valores Recebidos por Mês</Typography>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={monthlyData}>
-              <XAxis dataKey="month" />
-              <YAxis />
-              <Tooltip />
-              <Legend />
-              <Bar dataKey="value" fill="#8884d8" />
-            </BarChart>
-          </ResponsiveContainer>
         </Paper>
       </Grid>
       <Grid item xs={12}>

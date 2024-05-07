@@ -72,6 +72,24 @@ const sidebarNavItems = [
         ]
     },
     {
+        display: 'Associados',
+        icon: <AccountBalanceIcon/>,
+        to: '/admin/billing',
+        section: 'started',
+        subItems: [
+            {
+                display: 'Associados',
+                icon: <AccountBalanceIcon/>,
+                to: '/admin/associate/'
+            },
+            {
+                display: 'Relatórios',
+                icon: <AccountBalanceIcon/>,
+                to: '/admin/associate/logs'
+            },
+        ]
+    },
+    {
         display: 'Configurações',
         icon: <SettingsIcon/>,
         to: '/admin/config',

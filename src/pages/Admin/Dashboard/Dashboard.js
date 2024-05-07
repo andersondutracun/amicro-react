@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useAuthValue } from "../../../context/AuthContext";
 import { useFetchDocuments } from "../../../hooks/useFetchDocuments";
 import { useDeleteDocument } from "../../../hooks/useDeleteDocment";
 import styled from "styled-components";
@@ -44,6 +43,7 @@ const PageButton = styled(Button)`
   }
 `;
 
+
 const StyledDialog = styled(Dialog)`
   && {
     position: fixed;
@@ -69,7 +69,6 @@ const StyledDialog = styled(Dialog)`
 `;
 
 const Dashboard = () => {
-  const { user } = useAuthValue();
   const [currentPageMaterials, setCurrentPageMaterials] = useState(1);
   const [currentPageNews, setCurrentPageNews] = useState(1);
   const [deleteConfirmation, setDeleteConfirmation] = useState(null); // State para controlar o modal de confirmação
@@ -140,7 +139,7 @@ const Dashboard = () => {
                       Criador: {material.createdBy}
                     </Typography>
                   </CardContent>
-                  <div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     <Button component={Link} to={`/posts/${material.id}`} variant="outlined" color="primary">
                       Ver
                     </Button>
@@ -193,7 +192,7 @@ const Dashboard = () => {
                       Criador: {newsItem.createdBy}
                     </Typography>
                   </CardContent>
-                  <div>
+                  <div style={{ display: 'flex', gap: '4px' }}>
                     <Button component={Link} to={`/newsletter/post/${newsItem.id}`} variant="outlined" color="primary">
                       Ver
                     </Button>

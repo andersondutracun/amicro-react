@@ -26,7 +26,8 @@ app.get('/admin/users', async (req, res) => {
     const users = listUsersResult.users.map(userRecord => ({
       uid: userRecord.uid,
       email: userRecord.email,
-      displayName: userRecord.displayName
+      displayName: userRecord.displayName,
+      role: userRecord.role
     }));
     res.json(users);
   } catch (error) {
@@ -41,21 +42,22 @@ app.get('/admin/users/:userId', async (req, res) => {
   try {
     const user = await admin.auth().getUser(userId);
     // Consultar Firestore para obter dados adicionais do usuário
-    const userDoc = await db.collection('users').doc(userId).get();
+    const userDoc = await db.collection('empresas').doc(userId).get();
     const userData = userDoc.data();
     // Combinar dados do usuário do Auth e do Firestore
     const mergedData = {
       uid: user.uid,
       email: user.email,
       displayName: user.displayName,
-      birthdate: userData.birthdate,
-      cep: userData.cep,
-      address: userData.address,
-      number: userData.number,
-      bairro: userData.bairro,
-      cidade: userData.cidade,
-      estado: userData.estado,
-      phoneNumber: userData.phoneNumber
+      role: user.role,
+      birthdate: userData.responsavel.birthdate,
+      cep: userData.responsavel.cep,
+      address: userData.responsavel.endereco,
+      number: userData.responsavel.numero,
+      bairro: userData.responsavel.bairro,
+      cidade: userData.responsavel.cidade,
+      estado: userData.responsavel.estado,
+      phoneNumber: userData.responsavel.celular
       // Adicione aqui os campos do Firestore que deseja incluir
       // Exemplo: birthdate: userData.birthdate
     };

@@ -1,107 +1,167 @@
 import { useState } from 'react';
-import styles from './CreateMaterials.module.css';
 import { useNavigate } from 'react-router';
 import { useAuthValue } from '../../../context/AuthContext';
 import { useInsertDocument } from '../../../hooks/useInsertDocument';
+import styled from 'styled-components';
+import { Container, Typography, TextField, Button, CircularProgress, Grid, Paper } from '@mui/material';
+
+const StyledPaper = styled(Paper)`
+  padding: 20px;
+  margin-bottom: 20px;
+`;
+
+const StyledButton = styled(Button)`
+  margin-top: 20px;
+`;
+
 
 const CreateMaterials = () => {
-    const [title, setTitle] = useState("");
-    const [image, setImage] = useState("");
-    const [type, setType] = useState("");
-    const [preview, setPreview] = useState("");
-    const [link, setLink] = useState("");
-    const [formError, setFormError] = useState("");
+  const [formData, setFormData] = useState({
+    title: '',
+    image: '',
+    type: '',
+    preview: '',
+    link: ''
+  });
 
-    const {user} = useAuthValue();
+  const handleImageChange = async (e) => {
+    const { value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      image: value
+    }));
 
-    const {insertDocument, response} = useInsertDocument("materials");
+    // Example: Fetch image data from a URL if needed
+  };
 
-    const navigate = useNavigate();
+  const { user } = useAuthValue();
+  const { insertDocument, response } = useInsertDocument('materials');
+  const navigate = useNavigate();
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
+  const handleFormChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prevData) => ({
+      ...prevData,
+      [name]: value
+    }));
+  };
 
-        setFormError("");
+  const handleSubmit = (e) => {
+    e.preventDefault();
 
-        try {
-            
-            new URL(image)
+    const { title, image, type, preview, link } = formData;
 
-        } catch (error) {
-            
-            setFormError("A imagem precisa ser uma URL")
-
-        }
-
-        if(!title || !image || !type || !preview){
-            setFormError("Por favor, preencha todos os campos!");
-        }
-
-        if(formError) return;
-
-        insertDocument({
-            title,
-            image,
-            type,
-            preview,
-            uid: user.uid,
-            createdBy: user.displayName,
-            link,
-          });
+    // Validar campos
+    if (!title || !image || !type || !preview || !link) {
+      alert('Por favor, preencha todos os campos!');
+      return;
     }
- 
-    const handleImageChange = (e) => {
-      const imageUrl = e.target.value;
-      try {
-          new URL(imageUrl);
-          setImage(imageUrl);
-          setFormError('');
-      } catch (error) {
-          setFormError("A imagem precisa ser uma URL válida");
-      }
+
+    // Inserir documento no banco de dados
+    insertDocument({
+      title,
+      image,
+      type,
+      preview,
+      uid: user.uid,
+      createdBy: user.displayName,
+      link
+    });
+
+    // Navegar para a lista de materiais após a inserção
+    navigate('/admin/postlist');
   };
 
   return (
-    <div className='section'>
-      <div className='header'>
-        <div className='container'>
-          <div className='banner'>
-            <h1>Materiais</h1>
-            <p>Defina nos campos abaixo os dados do material.</p>
-          </div>
-        </div>
-      </div>
-      <div className={styles.create_post}>
-        <h2>Criar postagem (Materiais)</h2>
+    <Container maxWidth="xl" style={{ paddingTop: "20px" }}>
+      <Grid item xs={12}>
+        <Paper elevation={2} style={{ padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: "20px" }}>
+          <Typography variant="h4" gutterBottom>
+            Criar Postagem
+          </Typography>
+          <Typography variant="body1">
+            Criar postagem (Materiais)
+          </Typography>
+        </Paper>
+      </Grid>
+      <StyledPaper elevation={3}>
+        <Typography variant="h5" gutterBottom>
+          Criar Postagem
+        </Typography>
         <form onSubmit={handleSubmit}>
-            <label>
-                <span>Titulo</span>
-                <input type="text" name="title" required placeholder='Escreva o titulo do material' onChange={(e) => setTitle(e.target.value)} value={title}/>
-            </label>
-            <label>
-                <span>URL da Imagem</span>
-                <input type="text" name="image" required placeholder='Cole o link da imagem do material' onChange={(e) => setImage(e.target.value)} value={image}/>
-            </label>
-            {image && <img src={image} alt='Preview da imagem' style={{ maxWidth: '100%', maxHeight:'200px' }} />}
-            <label>
-                <span>Tipo de noticia</span>
-                <input type="text" name="type" required placeholder='Escreva o tipo do material. Ex: Cartilha, Revista, Planilha, etc.' onChange={(e) => setType(e.target.value)} value={type}/>
-            </label>
-            <label>
-                <span>Sub titulo</span>
-                <input type="text" name="preview" required placeholder='Escreva o subtitulo do material' onChange={(e) => setPreview(e.target.value)} value={preview}/>
-            </label>
-            <label>
-                <span>Link para download</span>
-                <input type="text" name="link" required placeholder='Insira o link do download' onChange={(e) => setLink(e.target.value)} value={link}/>
-            </label>
-            {!response.loading && <button className='btn'>Adicionar Material!</button>}
-            {response.loading && <button className='btn' disabled>Aguarde ...</button>}
-            {(response.error || formError) && (<p className='error'>{response.error || formError}</p>)}
+          <Grid container spacing={2}>
+            <Grid item xs={12}>
+              <TextField
+                label="Título"
+                variant="outlined"
+                fullWidth
+                name="title"
+                value={formData.title}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="URL da Imagem"
+                variant="outlined"
+                fullWidth
+                name="image"
+                value={formData.image}
+                onChange={handleImageChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {formData.image && <img src={formData.image} alt="Preview da Imagem" style={{ maxWidth: '100%', maxHeight: '200px', marginBottom: '10px' }} />}
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Tipo de Notícia"
+                variant="outlined"
+                fullWidth
+                name="type"
+                value={formData.type}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Conteúdo"
+                variant="outlined"
+                fullWidth
+                multiline
+                rows={4}
+                name="preview"
+                value={formData.preview}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              <TextField
+                label="Link"
+                variant="outlined"
+                fullWidth
+                name="link"
+                value={formData.link}
+                onChange={handleFormChange}
+              />
+            </Grid>
+            <Grid item xs={12}>
+              {!response.loading ? (
+                <StyledButton variant="contained" color="primary" type="submit">
+                  Postar Material
+                </StyledButton>
+              ) : (
+                <StyledButton variant="contained" color="primary" disabled>
+                  <CircularProgress size={24} />
+                  Aguarde ...
+                </StyledButton>
+              )}
+            </Grid>
+          </Grid>
         </form>
-      </div>
-    </div>
-  )
-}
+      </StyledPaper>
+    </Container>
+  );
+};
 
-export default CreateMaterials
+export default CreateMaterials;
