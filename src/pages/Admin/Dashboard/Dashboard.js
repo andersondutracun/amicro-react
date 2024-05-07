@@ -14,6 +14,7 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  Grid,
 } from "@mui/material";
 
 const SectionPaper = styled(Paper)`
@@ -39,6 +40,30 @@ const PageButton = styled(Button)`
 
     &:hover {
       background-color: ${(props) => (props.current ? "#007bff" : "#f0f0f0")};
+    }
+  }
+`;
+
+const StyledDialog = styled(Dialog)`
+  && {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 9999; /* Garante que o modal esteja na frente de outros elementos */
+    background-color: white; /* Cor de fundo do modal */
+
+    .MuiDialogTitle-root {
+      padding: 20px 24px;
+      background-color: #f8f9fa; /* Cor de fundo do título */
+    }
+
+    .MuiDialogContent-root {
+      padding: 16px 24px;
+    }
+
+    .MuiDialogActions-root {
+      padding: 8px 24px;
     }
   }
 `;
@@ -85,13 +110,17 @@ const Dashboard = () => {
   };
 
   return (
-    <Container maxWidth="xl" style={{ marginTop: 20 }}>
-      <Typography variant="h4" gutterBottom>
+    <Container maxWidth="xl" style={{ paddingTop: "20px"}}>
+      <Grid item xs={12}>
+        <Paper elevation={2} style={{ padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: "20px" }}>
+        <Typography variant="h4" gutterBottom>
         Lista de Postagens
       </Typography>
-      <Typography variant="body1" paragraph>
+      <Typography variant="body1">
         Gerencie todas as postagens feitas no site.
       </Typography>
+        </Paper>
+      </Grid>
 
       {/* Materiais */}
       <SectionPaper elevation={3}>
@@ -115,7 +144,7 @@ const Dashboard = () => {
                     <Button component={Link} to={`/posts/${material.id}`} variant="outlined" color="primary">
                       Ver
                     </Button>
-                    <Button component={Link} to={`/posts/edit/${material.id}`} variant="outlined">
+                    <Button component={Link} to={`/admin/materials/post/edit/${material.id}`} variant="outlined">
                       Editar
                     </Button>
                     <Button variant="outlined" color="error" onClick={() => handleDeleteConfirmation({ id: material.id, type: "material", title: material.title, createdBy: material.createdBy })}>
@@ -168,7 +197,7 @@ const Dashboard = () => {
                     <Button component={Link} to={`/newsletter/post/${newsItem.id}`} variant="outlined" color="primary">
                       Ver
                     </Button>
-                    <Button component={Link} to={`/posts/edit/${newsItem.id}`} variant="outlined">
+                    <Button component={Link} to={`/admin/newsletter/post/edit/${newsItem.id}`} variant="outlined">
                       Editar
                     </Button>
                     <Button variant="outlined" color="error" onClick={() => handleDeleteConfirmation({ id: newsItem.id, type: "news", title: newsItem.title, createdBy: newsItem.createdBy })}>
@@ -200,9 +229,9 @@ const Dashboard = () => {
       </SectionPaper>
 
       {/* Modal de confirmação */}
-      <Dialog open={Boolean(deleteConfirmation)} onClose={handleCloseModal}>
+      <StyledDialog open={Boolean(deleteConfirmation)} onClose={handleCloseModal}>
         <DialogTitle>Confirmar Exclusão</DialogTitle>
-        <DialogContent>
+        <DialogContent dividers>
           {deleteConfirmation && (
             <Typography variant="body1">
               Tem certeza que deseja excluir a postagem <strong>{deleteConfirmation.title}</strong> criada por{" "}
@@ -218,7 +247,7 @@ const Dashboard = () => {
             Excluir
           </Button>
         </DialogActions>
-      </Dialog>
+</StyledDialog>
     </Container>
   );
 };

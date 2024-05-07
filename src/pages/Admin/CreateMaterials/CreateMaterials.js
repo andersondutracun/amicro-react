@@ -46,6 +46,7 @@ const CreateMaterials = () => {
             preview,
             uid: user.uid,
             createdBy: user.displayName,
+            link,
           });
     }
  

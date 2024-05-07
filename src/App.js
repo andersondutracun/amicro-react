@@ -46,6 +46,8 @@ import Billing from './pages/Billling/Billing';
 import Services from './pages/Services/Services';
 import ResetPassword from './pages/ResetPassword/ResetPassword';
 import AdminSidebar from './components/AdminSidebar';
+import EditPost from './pages/Admin/EditPost/EditPost';
+import EditMaterials from './pages/Admin/EditMaterials/EditMaterials';
 
 
 function App() {
@@ -96,6 +98,8 @@ function App() {
         <Route path="/admin" element={!user ? <Login /> : <Navigate to="/admin/index" />} />
         <Route path='/admin/index' element={user ? <HomeAdmLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/postlist' element={user ? <DashboardLayout /> : <Navigate to="/admin/"/>} />
+        <Route path='/admin/newsletter/post/edit/:id' element={user ? <EditPostLayout /> : <Navigate to="/admin/"/>} />
+        <Route path='/admin/materials/post/edit/:id' element={user ? <EditMaterialsLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost' element={user ? <CreatePostLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/creatematerials' element={user ? <CreateMaterialsLayout /> : <Navigate to="/admin/"/>} />
         <Route path='/admin/createpost/createnewsletter' element={user ? <CreateNewsletterLayout /> : <Navigate to="/admin/"/>} />
@@ -320,7 +324,9 @@ function AdminLayout({ children }) {
         <AdminSidebar />
         <div className='admin-content'>
           <AdminNavbar/>
+          <div style={{ backgroundColor: "#f0f0f0", height: "100vh" }}>
           {children}
+          </div>
         </div>
       </div>
     </>
@@ -402,6 +408,26 @@ function ProfileAdminLayout() {
     <>
     <AdminLayout>
       <ProfileAdmin />
+    </AdminLayout>
+    </>
+  )
+}
+
+function EditPostLayout() {
+  return(
+    <>
+    <AdminLayout>
+      <EditPost />
+    </AdminLayout>
+    </>
+  )
+}
+
+function EditMaterialsLayout() {
+  return(
+    <>
+    <AdminLayout>
+      <EditMaterials />
     </AdminLayout>
     </>
   )

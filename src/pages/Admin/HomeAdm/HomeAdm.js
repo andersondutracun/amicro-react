@@ -73,7 +73,7 @@ const HomeAdm = () => {
 }, []);
 
   return (
-    <Container maxWidth="xl" style={{ marginTop: 20 }}>
+    <Container maxWidth="xl" style={{ marginTop: 20}}>
     <Grid container spacing={3}>
       <Grid item xs={12}>
         <Paper elevation={2} style={{ padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
