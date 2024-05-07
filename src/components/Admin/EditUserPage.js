@@ -1,8 +1,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import axios from 'axios';
 import { useParams, Link } from 'react-router-dom';
-import styles from "./EditUserPage.module.css"
-import { Container, Grid, Paper, Typography } from '@mui/material';
+import { Container, Grid, Paper, TextField, Typography } from '@mui/material';
 import styled from 'styled-components';
 
 const StyledPaper = styled(Paper)`
@@ -107,36 +106,38 @@ const EditUserPage = () => {
       </Grid>
         <StyledPaper elevation={3}>
           <Typography variant="h5" gutterBottom>Editar Usuário</Typography>
-            <label>Nome:
-                <input type="text" value={user.displayName} onChange={e => setDisplayName(e.target.value)} />
-            </label>
-            <label>Email:
-                <input type="email" value={user.email} onChange={e => setEmail(e.target.value)}  />
-            </label>
-            <label>Data de Nascimento:
-                <input type="date" value={birthdate} onChange={e => setBirthdate(e.target.value)} />
-            </label>
-            <label>CEP:
-                <input type="text" value={cep} onChange={e => setCep(e.target.value)} onBlur={handleCepChange} />
-            </label>            
-            <label>Endereço:
-                <input type="text" value={address} onChange={e => setAddress(e.target.value)} />
-            </label>
-            <label>Bairro:
-                <input type="text" value={bairro} onChange={e => setBairro(e.target.value)} />
-            </label>
-            <label>Cidade:
-                <input type="text" value={cidade} onChange={e => setCidade(e.target.value)} />
-            </label>            
-            <label>Estado:
-                <input type="text" value={estado} onChange={e => setEstado(e.target.value)} />
-            </label>
-            <label>Número:
-                <input type="text" value={number} onChange={e => setNumber(e.target.value)} />
-            </label>
-            <label>Número de Telefone:
-                <input type="tel" value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
-            </label>
+            <Grid container spacing={2}>
+              <Grid item xs={4}>
+                <TextField label="Nome" variant="outlined" fullWidth name="displayName" value={user.displayName} onChange={e => setDisplayName(e.target.value)}/>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField label="email" variant="outlined" fullWidth name="email" value={user.email} onChange={e => setEmail(e.target.value)}/>
+              </Grid>
+              <Grid item xs={4}>
+                <TextField label="Data de Nascimento" type="date" variant="outlined" fullWidth name="birthdate"  value={birthdate} onChange={e => setBirthdate(e.target.value)} InputLabelProps={{ shrink: true }}/>
+              </Grid>              
+              <Grid item xs={4}>
+                <TextField label="CEP" variant="outlined" fullWidth name="cep"  value={cep} onChange={e => setCep(e.target.value)} InputLabelProps={{ shrink: true }}/>
+              </Grid>            
+              <Grid item xs={4}>
+                <TextField label="Endereço" variant="outlined" fullWidth name="endereco"  value={address} onChange={e => setAddress(e.target.value)} />
+              </Grid>       
+              <Grid item xs={4}>
+                <TextField label="Bairro" variant="outlined" fullWidth name="bairro"  value={bairro} onChange={e => setBairro(e.target.value)} />
+              </Grid>    
+              <Grid item xs={4}>
+                <TextField label="Cidade" variant="outlined" fullWidth name="cidade"  value={cidade} onChange={e => setCidade(e.target.value)} />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField label="Estado" variant="outlined" fullWidth name="estado"  value={estado} onChange={e => setEstado(e.target.value)} />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField label="Número" variant="outlined" fullWidth name="numero"  value={number} onChange={e => setNumber(e.target.value)} />
+              </Grid>
+              <Grid item xs={4}>
+                <TextField label="Número de telefone" variant="outlined" fullWidth name="numero"  value={phoneNumber} onChange={e => setPhoneNumber(e.target.value)} />
+              </Grid>
+            </Grid>    
             <button className='btn' onClick={handleUpdateUser}>Salvar</button>
             <Link className='btn' to='/admin/users'>Voltar</Link>
         </StyledPaper>
