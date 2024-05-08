@@ -88,7 +88,8 @@ function Formulario() {
                   ...prevResponsavel,
                   endereco: data.logradouro,
                   bairro: data.bairro,
-                  cidade: data.localidade
+                  cidade: data.localidade,
+                  estado: data.uf
               }));
           } catch (error) {
               console.error('Erro ao consultar CEP:', error);
@@ -182,7 +183,7 @@ function Formulario() {
   const handleCheckCnpjExists = async () => {
     try {
       console.log('CNPJ enviado:', empresa.cnpj);
-      const response = await axios.post('http://localhost:3001/admin/checkCnpjExists', { cnpj: empresa.cnpj });
+      const response = await axios.post('http://192.168.10.93:3001/admin/checkCnpjExists', { cnpj: empresa.cnpj });
       return response.data.exists;
     } catch (error) {
       console.error('Erro ao verificar CNPJ:', error);
@@ -194,7 +195,6 @@ function Formulario() {
   const handleSubmit = async (e) => {
     e.preventDefault();
   
-    // Captura dos dados do formulário
     const formData = {
       email,
       password,
@@ -207,7 +207,7 @@ function Formulario() {
     };
   
     try {
-      const response = await fetch('http://localhost:3001/user/createUserAndEmpresa', {
+      const response = await fetch('http://192.168.10.93:3001/user/createUserAndEmpresa', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -260,7 +260,7 @@ return (
                   <input type="text" name="bairro" value={empresa.bairro} onChange={handleEmpresaChange} placeholder="Bairro" />
                   <input type="text" name="cep" value={empresa.cep} onChange={handleEmpresaChange} placeholder="CEP" />
                   <input type="text" name="cidade" value={empresa.cidade} onChange={handleEmpresaChange} placeholder="Cidade" />
-                  <input type="text" name="estado" value={empresa.uf} onChange={handleEmpresaChange} placeholder="Estado" />
+                  <input type="text" name="estado" value={empresa.estado} onChange={handleEmpresaChange} placeholder="Estado" />
                   <input type="text" name="telefone" value={empresa.telefone} onChange={handleEmpresaChange} placeholder="Telefone" />
                   <input type="text" name="site" value={empresa.site} onChange={handleEmpresaChange} placeholder="Site" />
                   <input type="text" name="email" value={empresa.email} onChange={handleEmpresaChange} placeholder="E-Mail" />
@@ -293,6 +293,7 @@ return (
                 <input type="text" name="numero" value={responsavel.numero} onChange={handleResponsavelChange} placeholder="Numero" />
                 <input type="text" name="bairro" value={responsavel.bairro} onChange={handleResponsavelChange} placeholder="Bairro" />
                 <input type="text" name="cidade" value={responsavel.cidade} onChange={handleResponsavelChange} placeholder="Cidade" />
+                <input type="text" name="estado" value={responsavel.estado} onChange={handleResponsavelChange} placeholder="Estado" />
                 <input type="text" name="telefone" value={responsavel.telefone} onChange={handleResponsavelChange} placeholder="Telefone" />
                 <input type="text" name="celular" value={responsavel.celular} onChange={handleResponsavelChange} placeholder="Celular" />
                 </div>

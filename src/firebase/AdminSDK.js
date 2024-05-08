@@ -23,12 +23,39 @@ const db = admin.firestore();
 app.get('/admin/users', async (req, res) => {
   try {
     const listUsersResult = await admin.auth().listUsers();
-    const users = listUsersResult.users.map(userRecord => ({
-      uid: userRecord.uid,
-      email: userRecord.email,
-      displayName: userRecord.displayName,
-      role: userRecord.role
-    }));
+    const users = [];
+
+    for (const userRecord of listUsersResult.users) {
+      const userData = {}; 
+
+      const userDocRef = db.collection('empresas').doc(userRecord.uid);
+      const userDoc = await userDocRef.get();
+
+      if (userDoc.exists) {
+        const userDataFromFirestore = userDoc.data();
+        userData.role = userDataFromFirestore.role; 
+      } else {
+        userData.role = 'No role assigned';
+      }
+
+      if (userDoc.exists) {
+        const userDataFromFirestore = userDoc.data();
+        userData.ativo = userDataFromFirestore.ativo; 
+      } else {
+        userData.ativo = 'No role assigned';
+      }
+
+      const user = {
+        uid: userRecord.uid,
+        email: userRecord.email,
+        displayName: userRecord.displayName,
+        role: userData.role,
+        ativo: userData.ativo
+      };
+
+      users.push(user);
+    }
+
     res.json(users);
   } catch (error) {
     console.error('Erro ao obter usuários:', error);
@@ -39,32 +66,32 @@ app.get('/admin/users', async (req, res) => {
 // Rota para obter um usuário específico
 app.get('/admin/users/:userId', async (req, res) => {
   const userId = req.params.userId;
+  
   try {
-    const user = await admin.auth().getUser(userId);
-    // Consultar Firestore para obter dados adicionais do usuário
-    const userDoc = await db.collection('empresas').doc(userId).get();
-    const userData = userDoc.data();
-    // Combinar dados do usuário do Auth e do Firestore
-    const mergedData = {
-      uid: user.uid,
-      email: user.email,
-      displayName: user.displayName,
-      role: user.role,
-      birthdate: userData.responsavel.birthdate,
-      cep: userData.responsavel.cep,
-      address: userData.responsavel.endereco,
-      number: userData.responsavel.numero,
-      bairro: userData.responsavel.bairro,
-      cidade: userData.responsavel.cidade,
-      estado: userData.responsavel.estado,
-      phoneNumber: userData.responsavel.celular
-      // Adicione aqui os campos do Firestore que deseja incluir
-      // Exemplo: birthdate: userData.birthdate
-    };
-    res.json(mergedData);
+    // Consultar Firestore para obter documentos na coleção "empresas" relacionados ao userId
+    const userDocsSnapshot = await db.collection('empresas').where('userId', '==', userId).get();
+    
+    if (userDocsSnapshot.empty) {
+      // Se não há documentos correspondentes, retornar uma resposta indicando que o usuário não foi encontrado
+      return res.status(404).json({ error: 'Nenhum documento encontrado para este usuário' });
+    }
+
+    // Array para armazenar os dados encontrados
+    const userData = [];
+
+    // Iterar sobre os documentos encontrados
+    userDocsSnapshot.forEach((doc) => {
+      // Obter dados do documento atual
+      const userDataFromDoc = doc.data();
+      // Adicionar dados ao array
+      userData.push(userDataFromDoc);
+    });
+
+    // Retornar os dados encontrados como resposta
+    res.json(userData);
   } catch (error) {
-    console.error('Erro ao obter usuário:', error);
-    res.status(404).json({ error: 'Usuário não encontrado' });
+    console.error('Erro ao obter dados do usuário no Firestore:', error);
+    res.status(500).json({ error: 'Erro ao obter dados do usuário' });
   }
 });
 
@@ -85,7 +112,7 @@ app.delete('/admin/users/:userId', async (req, res) => {
 // Rota para atualizar um usuário
 app.put('/admin/users/:userId', async (req, res) => {
   const userId = req.params.userId;
-  const { displayName, email, birthdate, cep, address,  bairro, cidade, estado, number, phoneNumber } = req.body;
+  const { displayName, email, role, birthdate, cep, address,  bairro, cidade, estado, number, phoneNumber } = req.body;
   try {
     // Verificar se o usuário já existe no Firestore
     const userDocRef = db.collection('users').doc(userId);
@@ -100,6 +127,7 @@ app.put('/admin/users/:userId', async (req, res) => {
     await userDocRef.update({
       displayName,
       email,
+      role,
       birthdate,
       cep,
       address,
@@ -211,15 +239,17 @@ app.post('/user/createUserAndEmpresa', async (req, res) => {
     }
 
     const user = await admin.auth().createUser({
+      displayName: responsavel.nomeCompleto,
       email,
       password,
-      role
     });
 
     const empresaData = {
       uid: user.uid,
+      role: "associado",
       empresa,
       responsavel,
+      email,
       taxaAssociacao,
       servicosInteresse,
       ativo

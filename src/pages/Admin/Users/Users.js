@@ -1,7 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import styles from './Users.module.css';
-import { Link } from 'react-router-dom';
 import {
   Button,
   Container,
@@ -12,26 +10,21 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  TextField,
 } from '@mui/material';
 import styled from 'styled-components';
+import { Link } from 'react-router-dom';
 
 const StyledPaper = styled(Paper)`
   padding: 20px;
   margin-bottom: 20px;
 `;
 
-const StyledButton = styled(Button)`
-  margin-top: 20px;
-`;
-
-const ErrorText = styled.p`
-  color: red;
-`;
-
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
+  table-layout: fixed; /* Garante que a tabela ocupe todo o espaço disponível */
 `;
 
 const StyledTableHead = styled.th`
@@ -39,38 +32,13 @@ const StyledTableHead = styled.th`
   padding: 12px;
   text-align: left;
   border-bottom: 1px solid #ddd;
+  cursor: pointer;
 `;
 
 const StyledTableCell = styled.td`
   padding: 12px;
   border-bottom: 1px solid #ddd;
-`;
-
-const ActionButtonsContainer = styled.div`
-  display: flex;
-  gap: 10px;
-`;
-
-const ActionButton = styled.button`
-  padding: 8px 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
-
-  &:hover {
-    background-color: #0056b3;
-  }
-`;
-
-const DeleteButton = styled(ActionButton)`
-  background-color: #dc3545;
-
-  &:hover {
-    background-color: #bd2130;
-  }
+  word-wrap: break-word;
 `;
 
 const PaginationContainer = styled.ul`
@@ -99,37 +67,15 @@ const PageButton = styled.button`
   }
 `;
 
-const StyledDialog = styled(Dialog)`
-  && {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 9999; /* Garante que o modal esteja na frente de outros elementos */
-    background-color: white; /* Cor de fundo do modal */
-
-    .MuiDialogTitle-root {
-      padding: 20px 24px;
-      background-color: #f8f9fa; /* Cor de fundo do título */
-    }
-
-    .MuiDialogContent-root {
-      padding: 16px 24px;
-    }
-
-    .MuiDialogActions-root {
-      padding: 8px 24px;
-    }
-  }
-`;
-
 const Users = () => {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [sortBy, setSortBy] = useState({ field: 'displayName', asc: true });
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(10);
-  const [deleteUserId, setDeleteUserId] = useState(null); // Armazenar o ID do usuário a ser excluído
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false); // Estado para controlar a abertura do modal
+  const [deleteUserId, setDeleteUserId] = useState(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     const loadUsers = async () => {
@@ -146,32 +92,57 @@ const Users = () => {
     loadUsers();
   }, []);
 
-  // Paginar usuários
-  const indexOfLastUser = currentPage * usersPerPage;
-  const indexOfFirstUser = indexOfLastUser - usersPerPage;
-  const currentUsers = users.slice(indexOfFirstUser, indexOfLastUser);
+  const handleSort = (field) => {
+    setSortBy((prev) => ({
+      field,
+      asc: prev.field === field ? !prev.asc : true,
+    }));
+  };
 
-  // Mudar de página
-  const paginate = pageNumber => setCurrentPage(pageNumber);
+  const sortedUsers = useMemo(() => {
+    const sorted = [...users].sort((a, b) => {
+      const aValue = a[sortBy.field];
+      const bValue = b[sortBy.field];
+
+      if (sortBy.asc) {
+        return aValue.localeCompare(bValue);
+      } else {
+        return bValue.localeCompare(aValue);
+      }
+    });
+
+    return sorted;
+  }, [users, sortBy]);
+
+  const filteredUsers = useMemo(() => {
+    if (!searchTerm) {
+      return sortedUsers;
+    }
+
+    const normalizedSearch = searchTerm.toLowerCase().trim();
+    return sortedUsers.filter((user) =>
+      user.displayName.toLowerCase().includes(normalizedSearch) ||
+      user.email.toLowerCase().includes(normalizedSearch) ||
+      user.role.toLowerCase().includes(normalizedSearch) ||
+      (user.ativo === 'true' ? 'Sim' : 'Não').toLowerCase().includes(normalizedSearch)
+    );
+  }, [sortedUsers, searchTerm]);
+
+  const paginate = (pageNumber) => setCurrentPage(pageNumber);
 
   const openDeleteModal = (userId) => {
-    const userToDelete = users.find((user) => user.uid === userId);
     setDeleteUserId(userId);
     setIsDeleteModalOpen(true);
   };
 
-  // Função para fechar o modal de exclusão
   const closeDeleteModal = () => {
     setIsDeleteModalOpen(false);
     setDeleteUserId(null);
   };
 
-  // Função para excluir usuário
   const deleteUser = async (userId) => {
-    // Exibir caixa de diálogo de confirmação
     try {
       await axios.delete(`http://localhost:3001/admin/users/${userId}`);
-      // Recarregar a lista de usuários após a exclusão
       const response = await axios.get('http://localhost:3001/admin/users');
       setUsers(response.data);
       closeDeleteModal();
@@ -181,83 +152,85 @@ const Users = () => {
   };
 
   return (
-    <Container maxWidth="xl" style={{ paddingTop: "20px" }}>
-      <Grid item xs={12}> 
-        <Paper elevation={2} style={{ padding: 20, display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: "20px" }}>
-          <Typography variant='h4' gutterBottom>
+    <Container maxWidth="xl" style={{ paddingTop: '20px' }}>
+      <Grid item xs={12}>
+        <Paper elevation={2} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Typography variant="h4" gutterBottom>
             Usuários
           </Typography>
-          <Typography variant="body1">
-            Gerencie todos os usuários do site.
-          </Typography>
+          <Typography variant="body1">Gerencie todos os usuários do site.</Typography>
         </Paper>
       </Grid>
       <StyledPaper elevation={3}>
         <Typography variant="h5" gutterBottom>Lista de Usuários</Typography>
-       
-        {loading ? (
-          <p className={styles.loading}>Carregando usuários...</p>
-        ) : (
-          <>
-            <StyledTable>
-              <thead>
-                <tr>
-                  <StyledTableHead>ID</StyledTableHead>
-                  <StyledTableHead>Email</StyledTableHead>
-                  <StyledTableHead>Nome</StyledTableHead>
-                  <StyledTableHead>Cargo</StyledTableHead>
-                  <StyledTableHead>Ações</StyledTableHead>
-                </tr>
-              </thead>
-              <tbody>
-                {currentUsers.map(user => (
-                  <tr key={user.uid}>
-                    <StyledTableCell>{user.uid}</StyledTableCell>
-                    <StyledTableCell>{user.email}</StyledTableCell>
-                    <StyledTableCell>{user.displayName}</StyledTableCell>
-                    <StyledTableCell>{user.role}</StyledTableCell>
-                    <StyledTableCell>
-                      <ActionButtonsContainer>
-                        <Button component={Link} to={`/admin/users/edit/${user.uid}`} variant="outlined">
-                          Editar
-                        </Button>
-                        <Button variant="outlined" color="error" onClick={() => openDeleteModal(user.uid)}>
-                          Excluir
-                        </Button>
-                      
-                      </ActionButtonsContainer>
-                    </StyledTableCell>
-                  </tr>
-                ))}
-              </tbody>
-            </StyledTable>
-            <PaginationContainer>
-              {Array.from({ length: Math.ceil(users.length / usersPerPage) }, (_, i) => (
-                <PageNumber key={i}>
-                  <PageButton
-                    isActive={currentPage === i + 1}
-                    onClick={() => paginate(i + 1)}
-                  >
-                    {i + 1}
-                  </PageButton>
-                </PageNumber>
-              ))}
-            </PaginationContainer>
-          </>
-        )}
-        
+        <TextField
+          label="Pesquisa"
+          fullWidth
+          variant='outlined'
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          style={{ marginTop: '5px', marginBottom: '5px' }}
+        />
+        <StyledTable>
+          <thead>
+            <tr>
+              <StyledTableHead onClick={() => handleSort('displayName')}>
+                Nome {sortBy.field === 'displayName' && (sortBy.asc ? '▲' : '▼')}
+              </StyledTableHead>
+              <StyledTableHead onClick={() => handleSort('email')}>
+                Email {sortBy.field === 'email' && (sortBy.asc ? '▲' : '▼')}
+              </StyledTableHead>
+              <StyledTableHead onClick={() => handleSort('role')}>
+                Cargo {sortBy.field === 'role' && (sortBy.asc ? '▲' : '▼')}
+              </StyledTableHead>
+              <StyledTableHead onClick={() => handleSort('ativo')}>
+                Ativo {sortBy.field === 'ativo' && (sortBy.asc ? '▲' : '▼')}
+              </StyledTableHead>
+              <StyledTableHead>Ações</StyledTableHead>
+            </tr>
+          </thead>
+          <tbody>
+            {filteredUsers.map((user) => (
+              <tr key={user.uid}>
+                <StyledTableCell>{user.displayName}</StyledTableCell>
+                <StyledTableCell>{user.email}</StyledTableCell>
+                <StyledTableCell>{user.role}</StyledTableCell>
+                <StyledTableCell>{user.ativo === 'true' ? 'Sim' : 'Não'}</StyledTableCell>
+                <StyledTableCell>
+                  <Button component={Link} to={`/admin/users/edit/${user.uid}`} variant="outlined">
+                    Editar
+                  </Button>
+                  <Button variant="outlined" color="error" onClick={() => openDeleteModal(user.uid)}>
+                    Excluir
+                  </Button>
+                </StyledTableCell>
+              </tr>
+            ))}
+          </tbody>
+        </StyledTable>
+        <PaginationContainer>
+          {Array.from({ length: Math.ceil(filteredUsers.length / usersPerPage) }, (_, i) => (
+            <PageNumber key={i}>
+              <PageButton
+                isActive={currentPage === i + 1}
+                onClick={() => paginate(i + 1)}
+              >
+                {i + 1}
+              </PageButton>
+            </PageNumber>
+          ))}
+        </PaginationContainer>
       </StyledPaper>
-
-      <StyledDialog open={isDeleteModalOpen} onClose={closeDeleteModal}>
+      <Dialog open={isDeleteModalOpen} onClose={closeDeleteModal}>
         <DialogTitle>Confirmação de Exclusão</DialogTitle>
         <DialogContent>
           {deleteUserId && (
             <Typography>
               Você está prestes a excluir o usuário:
               <br />
-              <strong>{users.find((user) => user.uid === deleteUserId)?.displayName}</strong>
+              <strong>{filteredUsers.find((user) => user.uid === deleteUserId)?.displayName}</strong>
               <br />
-              Email: {users.find((user) => user.uid === deleteUserId)?.email}
+              Email: {filteredUsers.find((user) => user.uid === deleteUserId)?.email}
             </Typography>
           )}
           <Typography variant="body2">Tem certeza de que deseja excluir este usuário?</Typography>
@@ -270,12 +243,8 @@ const Users = () => {
             Excluir
           </Button>
         </DialogActions>
-      </StyledDialog>
-
-
+      </Dialog>
     </Container>
-
-    
   );
 };
 
