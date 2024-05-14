@@ -68,26 +68,20 @@ app.get('/admin/users/:userId', async (req, res) => {
   const userId = req.params.userId;
   
   try {
-    // Consultar Firestore para obter documentos na coleção "empresas" relacionados ao userId
-    const userDocsSnapshot = await db.collection('empresas').where('userId', '==', userId).get();
+    
+    const userDocsSnapshot = await db.collection('empresas').where('uid', '==', userId).get();
     
     if (userDocsSnapshot.empty) {
-      // Se não há documentos correspondentes, retornar uma resposta indicando que o usuário não foi encontrado
       return res.status(404).json({ error: 'Nenhum documento encontrado para este usuário' });
     }
 
-    // Array para armazenar os dados encontrados
     const userData = [];
 
-    // Iterar sobre os documentos encontrados
     userDocsSnapshot.forEach((doc) => {
-      // Obter dados do documento atual
       const userDataFromDoc = doc.data();
-      // Adicionar dados ao array
-      userData.push(userDataFromDoc);
+      userData.push(userDataFromDoc)
     });
 
-    // Retornar os dados encontrados como resposta
     res.json(userData);
   } catch (error) {
     console.error('Erro ao obter dados do usuário no Firestore:', error);
