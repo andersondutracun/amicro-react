@@ -10,6 +10,9 @@ import {
   Typography,
   Select,
   Button,
+  Box,
+  Tabs,
+  Tab,
 } from '@mui/material'
 import styled from 'styled-components'
 
@@ -17,6 +20,39 @@ const StyledPaper = styled(Paper)`
   padding: 20px;
   margin-bottom: 20px;
 `
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function CustomTabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`simple-tabpanel-${index}`}
+      aria-labelledby={`simple-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ p: 3 }}>
+          <Typography>{children}</Typography>
+        </Box>
+      )}
+    </div>
+  );
+}
+
+function a11yProps(index: number) {
+  return {
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+  };
+}
 
 const EditUserPage = () => {
   const { userId } = useParams()
@@ -69,6 +105,12 @@ const EditUserPage = () => {
   const [servicosInteresse, setServicosInteresse] = useState([])
   const [outrosServicos, setOutrosServicos] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+  const [value, setValue] = React.useState(0);
+
+  const handleChange = (event: React.SyntheticEvent, newValue: number) => {
+    setValue(newValue);
+  };
+  
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -101,6 +143,8 @@ const EditUserPage = () => {
         })
 
         setEmail(userData.email)
+
+        setTaxaAssociacao(userData.taxaAssociacao)
 
         setResponsavel({
           nomeCompleto: userData.responsavel.nomeCompleto,
@@ -179,248 +223,451 @@ const EditUserPage = () => {
   }
 
   return (
+    
     <Container maxWidth="xl" style={{ paddingTop: '20px' }}>
       <StyledPaper elevation={3}>
-        <StyledPaper elevation={3}>
-          <Typography variant="h5" gutterBottom>
-            Dados do Responsável
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} lg={6} sm={6}>
-              <TextField
-                label="Nome"
-                variant="outlined"
-                fullWidth
-                name="displayName"
-                value={responsavel.nomeCompleto}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={6} sm={6}>
-              <TextField
-                label="Email"
-                variant="outlined"
-                fullWidth
-                name="email"
-                value={email}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Data de Nascimento"
-                type="date"
-                variant="outlined"
-                fullWidth
-                name="birthdate"
-                value={responsavel.birthdate}
-                onChange={handleResponsavelChange}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="CEP"
-                variant="outlined"
-                fullWidth
-                name="cep"
-                value={responsavel.cep}
-                onChange={handleResponsavelChange}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Endereço"
-                variant="outlined"
-                fullWidth
-                name="address"
-                value={responsavel.endereco}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Bairro"
-                variant="outlined"
-                fullWidth
-                name="bairro"
-                value={responsavel.bairro}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Cidade"
-                variant="outlined"
-                fullWidth
-                name="cidade"
-                value={responsavel.cidade}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Estado"
-                variant="outlined"
-                fullWidth
-                name="estado"
-                value={responsavel.estado}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Número"
-                variant="outlined"
-                fullWidth
-                name="number"
-                value={responsavel.numero}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Número de Telefone"
-                variant="outlined"
-                fullWidth
-                name="phoneNumber"
-                value={responsavel.celular}
-                onChange={handleResponsavelChange}
-              />
-            </Grid>
-          </Grid>
-        </StyledPaper>
-        <StyledPaper elevation={3}>
-          <Typography variant="h5" gutterBottom>
-            Dados da Empresa
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="CNPJ"
-                variant="outlined"
-                fullWidth
-                name="displayName"
-                value={empresa.cnpj}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Nome Fantasia"
-                variant="outlined"
-                fullWidth
-                name="email"
-                value={email}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Data de Nascimento"
-                type="date"
-                variant="outlined"
-                fullWidth
-                name="birthdate"
-                value={responsavel.birthdate}
-                onChange={handleEmpresaChange}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
+          <Tab label="Dados do Responsável" {...a11yProps(0)} />
+          <Tab label="Dados da Empresa" {...a11yProps(1)} />
+          <Tab label="Sócios" {...a11yProps(2)} />
+          <Tab label="Taxa de Associação" {...a11yProps(3)} />
+          <Tab label="Serviços" {...a11yProps(4)} />
+          <Tab label="Dados de Acesso" {...a11yProps(5)} />
+          <Tab label="Cargo" {...a11yProps(6)} />
+          <Tab label="Status" {...a11yProps(7)} />
+          </Tabs>
+          <CustomTabPanel value={value} index={0}>
+            <StyledPaper elevation={3}>
+              <Typography variant="h5" gutterBottom>
+                Dados do Responsável
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Nome"
+                    variant="outlined"
+                    fullWidth
+                    name="displayName"
+                    value={responsavel.nomeCompleto}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="CPF"
+                    variant="outlined"
+                    fullWidth
+                    name="cpf"
+                    value={responsavel.cpf}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="RG"
+                    type="text"
+                    variant="outlined"
+                    fullWidth
+                    name="rg"
+                    value={responsavel.rg}
+                    onChange={handleResponsavelChange}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Orgão Expedidor"
+                    variant="outlined"
+                    fullWidth
+                    name="orgaoExpedidor"
+                    value={responsavel.orgaoExpedidor}
+                    onChange={handleResponsavelChange}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="CEP"
+                    variant="outlined"
+                    fullWidth
+                    name="cep"
+                    value={responsavel.cep}
+                    onChange={handleResponsavelChange}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Endereço"
+                    variant="outlined"
+                    fullWidth
+                    name="endereco"
+                    value={responsavel.endereco}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Numero"
+                    variant="outlined"
+                    fullWidth
+   Taxa                 name="numero"
+                    value={responsavel.numero}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Bairro"
+                    variant="outlined"
+                    fullWidth
+                    name="bairro"
+                    value={responsavel.bairro}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Cidade"
+                    variant="outlined"
+                    fullWidth
+                    name="cidade"
+                    value={responsavel.cidade}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Telefone"
+                    variant="outlined"
+                    fullWidth
+                    name="telefone"
+                    value={responsavel.telefone}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Celular"
+                    variant="outlined"
+                    fullWidth
+                    name="celular"
+                    value={responsavel.celular}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="E-Mail"
+                    variant="outlined"
+                    fullWidth
+                    name="email"
+                    value={email}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+              </Grid>
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={1}>
+            <StyledPaper elevation={3}>
+              <Typography variant="h5" gutterBottom>
+                Dados da Empresa
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="CNPJ"
+                    variant="outlined"
+                    fullWidth
+                    name="displayName"
+                    value={empresa.cnpj}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Nome Fantasia"
+                    variant="outlined"
+                    fullWidth
+                    name="nomeFantasia"
+                    value={empresa.nomeFantasia}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Razão Social"
+                    type="text"
+                    variant="outlined"
+                    fullWidth
+                    name="razaoSocial"
+                    value={empresa.razaoSocial}
+                    onChange={handleEmpresaChange}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
 
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="CEP"
-                variant="outlined"
-                fullWidth
-                name="cep"
-                value={responsavel.cep}
-                onChange={handleEmpresaChange}
-                InputLabelProps={{ shrink: true }}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Endereço"
-                variant="outlined"
-                fullWidth
-                name="address"
-                value={responsavel.endereco}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Bairro"
-                variant="outlined"
-                fullWidth
-                name="bairro"
-                value={responsavel.bairro}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Cidade"
-                variant="outlined"
-                fullWidth
-                name="cidade"
-                value={responsavel.cidade}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Estado"
-                variant="outlined"
-                fullWidth
-                name="estado"
-                value={responsavel.estado}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Número"
-                variant="outlined"
-                fullWidth
-                name="number"
-                value={responsavel.numero}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-            <Grid item xs={12} lg={4} sm={6}>
-              <TextField
-                label="Número de Telefone"
-                variant="outlined"
-                fullWidth
-                name="phoneNumber"
-                value={responsavel.celular}
-                onChange={handleEmpresaChange}
-              />
-            </Grid>
-          </Grid>
-        </StyledPaper>
-        <StyledPaper elevation={3}>
-          <Grid container spacing={2}>
-            <Grid item xs={12} lg={4} sm={6}>
-              <Typography variant="h6">Cargo</Typography>
-              <Select
-                label="Cargo"
-                variant="outlined"
-                fullWidth
-                value={selectedRole}
-                onChange={(e) => setSelectedRole(e.target.value)}
-              >
-                <MenuItem value="Associado">Associado</MenuItem>
-                <MenuItem value="Marketing">Marketing</MenuItem>
-                <MenuItem value="Gestao">Gestão de usuários</MenuItem>
-                <MenuItem value="Admin">Administrador</MenuItem>
-              </Select>
-            </Grid>
-          </Grid>
-        </StyledPaper>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Inscrição Estadual"
+                    variant="outlined"
+                    fullWidth
+                    name="inscricaoEstadual"
+                    value={empresa.inscricaoEstadual}
+                    onChange={handleEmpresaChange}
+                    InputLabelProps={{ shrink: true }}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Tipo de Logradouro (Rua, Alameda, Avenida)"
+                    variant="outlined"
+                    fullWidth
+                    name="tipoLogradouro"
+                    value={empresa.tipoLogradouro}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Endereço"
+                    variant="outlined"
+                    fullWidth
+                    name="endereco"
+                    value={empresa.endereco}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Número"
+                    variant="outlined"
+                    fullWidth
+                    name="numero"
+                    value={empresa.numero}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Complemento"
+                    variant="outlined"
+                    fullWidth
+                    name="complemento"
+                    value={empresa.complemento}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Bairro"
+                    variant="outlined"
+                    fullWidth
+                    name="bairro"
+                    value={empresa.bairro}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="CEP"
+                    variant="outlined"
+                    fullWidth
+                    name="cep"
+                    value={empresa.cep}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Cidade"
+                    variant="outlined"
+                    fullWidth
+                    name="cidade"
+                    value={empresa.cidade}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Estado"
+                    variant="outlined"
+                    fullWidth
+                    name="estado"
+                    value={empresa.estado}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Telefone"
+                    variant="outlined"
+                    fullWidth
+                    name="telefone"
+                    value={empresa.telefone}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Site"
+                    variant="outlined"
+                    fullWidth
+                    name="site"
+                    value={empresa.site}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="E-Mail"
+                    variant="outlined"
+                    fullWidth
+                    name="email"
+                    value={empresa.email}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Ramo de Atividade"
+                    variant="outlined"
+                    fullWidth
+                    name="ramoAtividade"
+                    value={empresa.ramoAtividade}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Data de Fundação"
+                    variant="outlined"
+                    fullWidth
+                    name="dataFundacao"
+                    value={empresa.dataFundacao}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <TextField
+                    label="Número de Funcionários"
+                    variant="outlined"
+                    fullWidth
+                    name="numFuncionarios"
+                    value={empresa.numFuncionarios}
+                    onChange={handleEmpresaChange}
+                  />
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <Select
+                    label="Porte da Empresa"
+                    variant="outlined"
+                    fullWidth
+                    name="porteEmpresa"
+                    value={empresa.porteEmpresa}
+                    onChange={handleEmpresaChange}
+                  >
+                    <MenuItem value="MEI">MEI - Microempreendedor Individual</MenuItem>
+                    <MenuItem value="ME">ME - Microempresa</MenuItem>
+                    <MenuItem value="EPP">EPP - Empresa de Pequeno Porte</MenuItem>
+                  </Select>
+                </Grid>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <Select
+                    label="Setor de Atuação"
+                    variant="outlined"
+                    fullWidth
+                    name="setorAtuacao"
+                    value={empresa.setorAtuacao}
+                    onChange={handleEmpresaChange}
+                  >
+                    <MenuItem value="comercio">Comércio</MenuItem>
+                    <MenuItem value="servicos">Serviços</MenuItem>
+                    <MenuItem value="industria">Industria</MenuItem>
+                  </Select>
+                </Grid>
+              </Grid>
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={2}>
+            <StyledPaper elevation={3}>
+              Socios
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={3}>
+            <StyledPaper elevation={3}>
+              <Grid item xs={12} lg={4} sm={6}>
+                  <Select
+                    label="Taxa de Associação"
+                    variant="outlined"
+                    fullWidth
+                    name="taxaAssociacao"
+                    value={taxaAssociacao}
+                    onChange={handleEmpresaChange}
+                  >
+                    <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
+                    <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
+                    <MenuItem value="Anual">Anual R$ 300,00</MenuItem>
+                  </Select>
+                </Grid>
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={4}>
+            <StyledPaper elevation={3}>
+              Serviços
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={5}>
+            <StyledPaper elevation={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={12} sm={12}>
+                  <Typography>Para mudar o email de acesso do usuário, utilize o campo a baixo</Typography>
+                </Grid>
+                <Grid item xs={12} lg={12} sm={12}>
+                  <TextField
+                    label="E-Mail"
+                    variant="outlined"
+                    fullWidth
+                    name="email"
+                    value={email}
+                    onChange={handleResponsavelChange}
+                  />
+                </Grid>
+              </Grid>
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={6}>
+            <StyledPaper elevation={3}>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <Typography variant="h6">Cargo</Typography>
+                  <Select
+                    label="Cargo"
+                    variant="outlined"
+                    fullWidth
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                  >
+                    <MenuItem value="Associado">Associado</MenuItem>
+                    <MenuItem value="Marketing">Marketing</MenuItem>
+                    <MenuItem value="Gestao">Gestão de usuários</MenuItem>
+                    <MenuItem value="Admin">Administrador</MenuItem>
+                  </Select>
+                </Grid>
+              </Grid>
+            </StyledPaper>
+          </CustomTabPanel>
+          <CustomTabPanel value={value} index={7}>
+            <StyledPaper elevation={3}>
+              Status
+            </StyledPaper>
+          </CustomTabPanel>
+        </Box>
+        
+        
+        
 
         <Button variant="contained" color="primary" onClick={handleUpdateUser}>
           Salvar
