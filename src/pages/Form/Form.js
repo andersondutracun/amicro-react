@@ -197,8 +197,11 @@ function Formulario() {
       confirmPassword,
       empresa,
       responsavel,
+      socios,
       taxaAssociacao,
       servicosInteresse,
+      outrosServicos,
+      role: 'Associado',
       ativo: 'false',
     }
 

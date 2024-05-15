@@ -13,8 +13,15 @@ import {
   Box,
   Tabs,
   Tab,
+  Table,
+  TableHead,
+  TableRow,
+  TableCell,
 } from '@mui/material'
 import styled from 'styled-components'
+import { TableBody } from 'flowbite-react'
+import { useFetchDocument } from '../../hooks/useFetchDocument'
+import { db } from '../../firebase/config'
 
 const StyledPaper = styled(Paper)`
   padding: 20px;
@@ -105,12 +112,79 @@ const EditUserPage = () => {
   const [servicosInteresse, setServicosInteresse] = useState([])
   const [outrosServicos, setOutrosServicos] = useState('')
   const [selectedRole, setSelectedRole] = useState('')
+  const [ativo, setAtivo] = useState('');
   const [value, setValue] = React.useState(0);
+  const [payments, setPayments] = useState([]);
+
+  const { document: userData } = useFetchDocument('empresas', userId);
 
   const handleChange = (event: React.SyntheticEvent, newValue: number) => {
     setValue(newValue);
   };
+
+  const handleServicosInteresseChange = (e) => {
+    const options = e.target.options
+    const selectedServices = []
+    let outrosSelecionado = false
+
+    for (let i = 0; i < options.length; i++) {
+      if (options[i].selected) {
+        selectedServices.push(options[i].value)
+        if (options[i].value === 'outros') {
+          outrosSelecionado = true
+        }
+      }
+    }
+
+    if (outrosSelecionado && !selectedServices.includes('outros')) {
+      setOutrosServicos('')
+      selectedServices.push('outros')
+    }
+
+    setServicosInteresse(selectedServices)
+  }
   
+  const handleOutrosServicosChange = (e) => {
+    setOutrosServicos(e.target.value)
+  }
+
+  useEffect(() => {
+    if (userData && userData.taxaAssociacao) {
+      setTaxaAssociacao(userData.taxaAssociacao);
+
+      // Função para buscar os pagamentos do usuário
+      const fetchUserPayments = async () => {
+        try {
+          const paymentsRef = db.collection('payments');
+          const snapshot = await paymentsRef.where('uid', '==', userId).get();
+
+          const userPayments = [];
+          snapshot.forEach((doc) => {
+            const paymentData = doc.data();
+            userPayments.push(paymentData);
+          });
+
+          // Atualiza os pagamentos com os dados obtidos do Firestore
+          if (userPayments.length > 0) {
+            const updatedPayments = payments.map((payment, index) => {
+              const matchingPayment = userPayments.find((p) => p.payment === index + 1); // Procura o pagamento correspondente na coleção
+              if (matchingPayment) {
+                return { ...payment, paidAt: matchingPayment.paidAt };
+              }
+              return payment;
+            });
+
+            setPayments(updatedPayments);
+          }
+        } catch (error) {
+          console.error('Erro ao buscar pagamentos:', error);
+        }
+      };
+
+      // Chama a função para buscar os pagamentos do usuário
+      fetchUserPayments();
+    }
+  }, [userData, taxaAssociacao, userId]);
 
   useEffect(() => {
     const fetchUser = async () => {
@@ -142,6 +216,11 @@ const EditUserPage = () => {
           setorAtuacao: userData.empresa.setorAtuacao,
         })
 
+        setSelectedRole(userData.role)
+        setSocios(userData.socios)
+        setServicosInteresse(userData.servicosInteresse)
+        setOutrosServicos(userData.outrosServicos)
+
         setEmail(userData.email)
 
         setTaxaAssociacao(userData.taxaAssociacao)
@@ -160,6 +239,9 @@ const EditUserPage = () => {
           celular: userData.responsavel.celular,
           estado: userData.responsavel.estado,
         })
+
+        setAtivo(userData.ativo)
+
       } catch (error) {
         console.error('Erro ao carregar usuário:', error)
       }
@@ -194,6 +276,13 @@ const EditUserPage = () => {
     }
   }
 
+   const handleSocioChange = (index, e) => {
+    const { name, value } = e.target
+    const updatedSocios = [...socios]
+    updatedSocios[index][name] = value
+    setSocios(updatedSocios)
+  }
+
   const handleEmpresaChange = (e) => {
     const { name, value } = e.target
     setEmpresa((prevEmpresa) => ({
@@ -206,7 +295,7 @@ const EditUserPage = () => {
     setLoading(true)
     try {
       const userData = {
-        role: selectedRole, // Use o selectedRole em vez do user.role
+        role: selectedRole, 
       }
 
       await axios.put(`http://localhost:3001/admin/users/${userId}`, userData)
@@ -227,15 +316,15 @@ const EditUserPage = () => {
     <Container maxWidth="xl" style={{ paddingTop: '20px' }}>
       <StyledPaper elevation={3}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
-          <Tab label="Dados do Responsável" {...a11yProps(0)} />
-          <Tab label="Dados da Empresa" {...a11yProps(1)} />
-          <Tab label="Sócios" {...a11yProps(2)} />
-          <Tab label="Taxa de Associação" {...a11yProps(3)} />
-          <Tab label="Serviços" {...a11yProps(4)} />
-          <Tab label="Dados de Acesso" {...a11yProps(5)} />
-          <Tab label="Cargo" {...a11yProps(6)} />
-          <Tab label="Status" {...a11yProps(7)} />
+          <Tabs value={value} onChange={handleChange} aria-label="Tabs Responsável" variant="scrollable" scrollButtons allowScrollButtonsMobile>
+            <Tab label="Dados do Responsável" {...a11yProps(0)} />
+            <Tab label="Dados da Empresa" {...a11yProps(1)} />
+            <Tab label="Sócios" {...a11yProps(2)} />
+            <Tab label="Taxa de Associação" {...a11yProps(3)} />
+            <Tab label="Serviços" {...a11yProps(4)} />
+            <Tab label="Dados de Acesso" {...a11yProps(5)} />
+            <Tab label="Cargo" {...a11yProps(6)} />
+            <Tab label="Status" {...a11yProps(7)} />
           </Tabs>
           <CustomTabPanel value={value} index={0}>
             <StyledPaper elevation={3}>
@@ -247,8 +336,7 @@ const EditUserPage = () => {
                   <TextField
                     label="Nome"
                     variant="outlined"
-                    fullWidth
-                    name="displayName"
+                    fullWidth name="displayName"
                     value={responsavel.nomeCompleto}
                     onChange={handleResponsavelChange}
                   />
@@ -312,7 +400,7 @@ const EditUserPage = () => {
                     label="Numero"
                     variant="outlined"
                     fullWidth
-   Taxa                 name="numero"
+                    name="numero"
                     value={responsavel.numero}
                     onChange={handleResponsavelChange}
                   />
@@ -593,34 +681,195 @@ const EditUserPage = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
             <StyledPaper elevation={3}>
-              Socios
+              <Typography variant="h5" gutterBottom>
+                Dados do(s) Socios
+              </Typography>
+              
+              {socios.map((socio, index) => (
+                
+                <Grid container spacing={2} style={{ marginBottom: "5px"}}>
+                  <Grid item xs={12} lg={12} sm={6}>
+                    <Typography variant="h7" gutterBottom>Sócio: {socio.nomeCompleto}</Typography>
+                    </Grid>
+                  <Grid item xs={12} lg={3} sm={6}>
+                    <TextField
+                      label="Nome"
+                      variant="outlined"
+                      fullWidth name="displayName"
+                      value={socio.nomeCompleto}
+                      onChange={(e) => handleSocioChange(index, e)}
+                    />
+                  </Grid>
+                  <Grid item xs={12} lg={3} sm={6}>
+                    <TextField
+                      label="CPF"
+                      variant="outlined"
+                      fullWidth name="cpf"
+                      value={socio.cpf}
+                      onChange={(e) => handleSocioChange(index, e)}
+                    />  
+                  </Grid>
+                  <Grid item xs={12} lg={3} sm={6}>
+                    <TextField
+                      label="E-Mail"
+                      variant="outlined"
+                      fullWidth name="email"
+                      value={socio.email}
+                      onChange={(e) => handleSocioChange(index, e)}
+                    />  
+                  </Grid>
+                  <Grid item xs={12} lg={3} sm={6}>
+                    <TextField
+                      label="Celular"
+                      variant="outlined"
+                      fullWidth name="celular"
+                      value={socio.celular}
+                      onChange={(e) => handleSocioChange(index, e)}
+                    />  
+                  </Grid>
+              </Grid>
+            ))}
             </StyledPaper>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={3}>
             <StyledPaper elevation={3}>
-              <Grid item xs={12} lg={4} sm={6}>
-                  <Select
-                    label="Taxa de Associação"
-                    variant="outlined"
-                    fullWidth
-                    name="taxaAssociacao"
-                    value={taxaAssociacao}
-                    onChange={handleEmpresaChange}
-                  >
-                    <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
-                    <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
-                    <MenuItem value="Anual">Anual R$ 300,00</MenuItem>
-                  </Select>
+              <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                <Typography variant="h5" gutterBottom>
+                  Taxa de Associação
+                </Typography>
+                <Grid container spacing={2} style={{ marginBottom: "15px"}}>
+                  <Grid item xs={12} lg={4} sm={6}>
+                      <Select
+                        label="Taxa de Associação"
+                        variant="outlined"
+                        fullWidth
+                        name="taxaAssociacao"
+                        value={taxaAssociacao}
+                        onChange={handleEmpresaChange}
+                      >
+                        <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
+                        <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
+                        <MenuItem value="Anual">Anual R$ 300,00</MenuItem>
+                      </Select>
+                  </Grid>
                 </Grid>
+              </Box>
+              <Grid container spacing={2} style={{ marginBottom: "15px" }}>
+                <Grid item xs={12} lg={12} sm={12}>
+                  <Typography variant="h6" color="initial" display="flex" justifyContent="center">
+                    Pagamentos
+                  </Typography>
+                  <Table>
+                    <TableHead>
+                      <TableRow>
+                        <TableCell>Mês</TableCell>
+                        <TableCell>Data de Validade</TableCell>
+                        <TableCell>Status do Pagamento</TableCell>
+                        <TableCell>Data de Pagamento</TableCell>
+                      </TableRow>
+                    </TableHead>
+                    <TableBody>
+                      {payments.map((payment, index) => (
+                        <TableRow key={index}>
+                          <TableCell>{payment.month}</TableCell>
+                          <TableCell>{payment.validade}</TableCell>
+                          <TableCell>
+                            {payment.paid ? (
+                              <Button variant="contained" disabled>
+                                Pago
+                              </Button>
+                            ) : (
+                              <Button variant="contained" color="primary">
+                                Pagar
+                              </Button>
+                            )}
+                          </TableCell>
+                          <TableCell>{payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : 'Não pago'}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Grid>
+              </Grid>
             </StyledPaper>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={4}>
             <StyledPaper elevation={3}>
-              Serviços
+              <Typography variant="h5" gutterBottom>
+                Serviços de interesse
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={12} sm={6}>
+                  <Select
+                    multiple={true}
+                    native
+                    fullWidth
+                    name="servicosInteresse"
+                    value={servicosInteresse}
+                    onChange={handleServicosInteresseChange}
+                  >
+                    <MenuItem value="descontos_em_educacao_superior">
+                      Descontos em Educação superior
+                    </MenuItem>
+                    <MenuItem value="descontos_em_educacao_superior">
+                  Descontos em Educação superior
+                    </MenuItem>
+                    <MenuItem value="cursos_de_qualificacao_empresarial">
+                  Cursos de qualificação empresarial
+                    </MenuItem>
+                    <MenuItem value="cursos_de_qualificacao_dos_funcionarios">
+                  Cursos de qualificação dos funcionários
+                    </MenuItem>
+                    <MenuItem value="palestras_empresariais">Palestras empresariais</MenuItem>
+                    <MenuItem value="palestras_para_os_funcionarios">
+                  Palestras para os funcionarios
+                    </MenuItem>
+                    <MenuItem value="consultoria_contabil">Consultoria contábil</MenuItem>
+                    <MenuItem value="consultoria_financeira">Consultoria financeira</MenuItem>
+                    <MenuItem value="consultoria_de_rh">Consultoria de RH</MenuItem>
+                    <MenuItem value="recrutamento_de_pessoas">Recrutamento de pessoas</MenuItem>
+                    <MenuItem value="consultoria_vendas">Consultoria vendas</MenuItem>
+                    <MenuItem value="consultoria_em_gestao">Consultoria em gestão</MenuItem>
+                    <MenuItem value="consultoria_em_tecnologia">Consultoria em tecnologia</MenuItem>
+
+                    <MenuItem value="consultoria_em_marketing">Consultoria em Marketing</MenuItem>
+                    <MenuItem value="consultoria_em_midias_sociais">Consultoria em mídias sociais</MenuItem>
+                    <MenuItem value="consultoria_em_exportacao_ou_importacao">
+                  Consultoria em exportação ou importação
+                    </MenuItem>
+                    <MenuItem value="plano_de_saude">Plano de saúde</MenuItem>
+                    <MenuItem value="plano_de_saude_mental">Plano de saúde bucal</MenuItem>
+                    <MenuItem value="atendimento_em_saude_mental">Atendimento em saúde mental</MenuItem>
+                    <MenuItem value="intermediacao_de_negocios">Intermediação de negócios</MenuItem>
+                    <MenuItem value="networking_entre_empresas">Networking entre empresas</MenuItem>
+                    <MenuItem value="consultoria_juridica">Consultoria jurídica</MenuItem>
+                    <MenuItem value="consultoria_tributaria">Consultoria tributaria</MenuItem>
+                    <MenuItem value="coaching_para_gestores">Coaching para Gestores</MenuItem>
+                    <MenuItem value="mentoria_empresarial">Mentoria Empresarial</MenuItem>
+                    <MenuItem value="outros">Outros</MenuItem>
+                  </Select>
+                </Grid>
+                <Grid item xs={12} lg={12} sm={6}>
+                  {servicosInteresse.includes('outros') && (
+                    <TextField
+                      label="Outros"
+                      type="text"
+                      fullWidth
+                      variant='outlined'
+                      value={outrosServicos}
+                      onChange={handleOutrosServicosChange}
+                      placeholder="Descreva outros serviços de interesse"
+                    />
+                  )}
+                </Grid>
+              </Grid>
             </StyledPaper>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={5}>
             <StyledPaper elevation={3}>
+              <Typography variant="h5" gutterBottom>
+                Dados de Acesso
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} lg={12} sm={12}>
                   <Typography>Para mudar o email de acesso do usuário, utilize o campo a baixo</Typography>
@@ -640,9 +889,11 @@ const EditUserPage = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={6}>
             <StyledPaper elevation={3}>
+              <Typography variant="h5" gutterBottom>
+                Cargo de acesso no site
+              </Typography>
               <Grid container spacing={2}>
                 <Grid item xs={12} lg={4} sm={6}>
-                  <Typography variant="h6">Cargo</Typography>
                   <Select
                     label="Cargo"
                     variant="outlined"
@@ -661,7 +912,24 @@ const EditUserPage = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={7}>
             <StyledPaper elevation={3}>
-              Status
+              <Typography variant="h5" gutterBottom>
+                Status
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} lg={4} sm={6}>
+                  <Select
+                    label="Status"
+                    variant="outlined"
+                    fullWidth
+                    name="status"
+                    value={ativo === 'true' ? 'Sim' : 'Não'}
+                    onChange={handleResponsavelChange}
+                  >
+                    <MenuItem value="Sim">Sim</MenuItem>
+                    <MenuItem value="Não">Não</MenuItem>
+                  </Select>
+                </Grid>
+              </Grid>
             </StyledPaper>
           </CustomTabPanel>
         </Box>
@@ -669,12 +937,12 @@ const EditUserPage = () => {
         
         
 
-        <Button variant="contained" color="primary" onClick={handleUpdateUser}>
+        <Button variant="contained" color="primary" onClick={handleUpdateUser} style={{ marginTop: "10px" }}>
           Salvar
         </Button>
-        <Link to="/admin/users" style={{ marginLeft: '10px' }}>
+        <Button variant="outlined" to="/admin/users" style={{ marginLeft: '10px', marginTop: "10px" }}>
           Voltar
-        </Link>
+        </Button>
       </StyledPaper>
     </Container>
   )
