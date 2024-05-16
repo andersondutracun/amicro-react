@@ -123,6 +123,14 @@ const EditUserPage = () => {
     setValue(newValue);
   };
 
+    const handleAddSocio = () => {
+    if (socios.length < 5) {
+      setSocios([...socios, { nomeCompleto: '', cpf: '', email: '', celular: '' }])
+    } else {
+      alert('Você atingiu o limite máximo de sócios (5).')
+    }
+  }
+
   const handleServicosInteresseChange = (e) => {
     const options = e.target.options
     const selectedServices = []
@@ -704,10 +712,16 @@ const EditUserPage = () => {
           </CustomTabPanel>
           <CustomTabPanel value={value} index={2}>
             <StyledPaper elevation={3}>
-              <Typography variant="h5" gutterBottom>
-                Dados do(s) Socios
-              </Typography>
-              
+              <Grid container spacing={2} style={{ display: 'flex', flexDirection: 'row', marginBottom: "5px" }}>
+                <Grid item xs={12} lg={6} sm={6}>
+                  <Typography variant="h5" gutterBottom>
+                    Dados do(s) Socios
+                  </Typography>
+                </Grid>
+                <Grid item xs={12} lg={6} sm={6} style={{ display: 'flex', justifyContent: 'end' }}>
+                  <Button variant="outlined" onClick={handleAddSocio}>Adicionar</Button>
+                </Grid>
+            </Grid>
               { socios && socios.map((socio, index) => (
                 
                 <Grid container spacing={2} style={{ marginBottom: "5px"}}>
