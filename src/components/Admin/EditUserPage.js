@@ -17,6 +17,7 @@ import {
   TableHead,
   TableRow,
   TableCell,
+  Breadcrumbs,
 } from '@mui/material'
 import styled from 'styled-components'
 import { TableBody } from 'flowbite-react'
@@ -314,6 +315,28 @@ const EditUserPage = () => {
   return (
     
     <Container maxWidth="xl" style={{ paddingTop: '20px' }}>
+      <Grid item xs={12}>
+        <StyledPaper elevation={2} style={{ padding: '20px', marginBottom: '20px' }}>
+          <Breadcrumbs separator="»" aria-label="breadcrumb">
+            <Link underline="hover" color="inherit" href="/admin/">
+                Usuários
+              </Link>
+              <Link
+                underline="hover"
+                color="inherit"
+                href="/admin/users/"
+              >
+                Listar Usuários
+            </Link>
+            <Typography color="text.primary">Editar</Typography>
+            <Typography color="text.primary">{responsavel.nomeCompleto}</Typography>
+          </Breadcrumbs>
+          <Typography variant="h4" style={{ marginTop: "15px" }} gutterBottom>
+            Editar
+          </Typography>
+          <Typography variant="body1">Edite os dados do usuário e da empresa de: {responsavel.nomeCompleto}.</Typography>
+        </StyledPaper>
+      </Grid>
       <StyledPaper elevation={3}>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
           <Tabs value={value} onChange={handleChange} aria-label="Tabs Responsável" variant="scrollable" scrollButtons allowScrollButtonsMobile>
@@ -685,7 +708,7 @@ const EditUserPage = () => {
                 Dados do(s) Socios
               </Typography>
               
-              {socios.map((socio, index) => (
+              { socios && socios.map((socio, index) => (
                 
                 <Grid container spacing={2} style={{ marginBottom: "5px"}}>
                   <Grid item xs={12} lg={12} sm={6}>

@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import axios from 'axios';
+import React, { useState, useEffect, useMemo } from 'react'
+import axios from 'axios'
 import {
   Button,
   Container,
@@ -11,21 +11,22 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-} from '@mui/material';
-import styled from 'styled-components';
-import { Link } from 'react-router-dom';
+  Breadcrumbs,
+} from '@mui/material'
+import styled from 'styled-components'
+import { Link } from 'react-router-dom'
 
 const StyledPaper = styled(Paper)`
   padding: 20px;
   margin-bottom: 20px;
-`;
+`
 
 const StyledTable = styled.table`
   width: 100%;
   border-collapse: collapse;
   margin-top: 20px;
   table-layout: fixed; /* Garante que a tabela ocupe todo o espaço disponível */
-`;
+`
 
 const StyledTableHead = styled.th`
   background-color: #f0f0f0;
@@ -33,24 +34,24 @@ const StyledTableHead = styled.th`
   text-align: left;
   border-bottom: 1px solid #ddd;
   cursor: pointer;
-`;
+`
 
 const StyledTableCell = styled.td`
   padding: 12px;
   border-bottom: 1px solid #ddd;
   word-wrap: break-word;
-`;
+`
 
 const PaginationContainer = styled.ul`
   display: flex;
   list-style: none;
   padding: 0;
   margin-top: 20px;
-`;
+`
 
 const PageNumber = styled.li`
   margin-right: 8px;
-`;
+`
 
 const PageButton = styled.button`
   padding: 8px;
@@ -59,114 +60,123 @@ const PageButton = styled.button`
   border: 1px solid #007bff;
   border-radius: 4px;
   cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  transition:
+    background-color 0.3s ease,
+    color 0.3s ease;
 
   &:hover {
     background-color: #0056b3;
     color: #fff;
   }
-`;
+`
 
 const Users = () => {
-  const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [sortBy, setSortBy] = useState({ field: 'displayName', asc: true });
-  const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(10);
-  const [deleteUserId, setDeleteUserId] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [users, setUsers] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [sortBy, setSortBy] = useState({ field: 'displayName', asc: true })
+  const [currentPage, setCurrentPage] = useState(1)
+  const [usersPerPage] = useState(10)
+  const [deleteUserId, setDeleteUserId] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [searchTerm, setSearchTerm] = useState('')
 
   useEffect(() => {
     const loadUsers = async () => {
-      setLoading(true);
+      setLoading(true)
       try {
-        const response = await axios.get('http://localhost:3001/admin/users');
-        setUsers(response.data);
+        const response = await axios.get('http://localhost:3001/admin/users')
+        setUsers(response.data)
       } catch (error) {
-        console.error('Erro ao carregar usuários:', error);
+        console.error('Erro ao carregar usuários:', error)
       }
-      setLoading(false);
-    };
+      setLoading(false)
+    }
 
-    loadUsers();
-  }, []);
+    loadUsers()
+  }, [])
 
   const handleSort = (field) => {
     setSortBy((prev) => ({
       field,
       asc: prev.field === field ? !prev.asc : true,
-    }));
-  };
+    }))
+  }
 
   const sortedUsers = useMemo(() => {
     const sorted = [...users].sort((a, b) => {
-      const aValue = a[sortBy.field];
-      const bValue = b[sortBy.field];
+      const aValue = a[sortBy.field]
+      const bValue = b[sortBy.field]
 
       if (sortBy.asc) {
-        return aValue.localeCompare(bValue);
+        return aValue.localeCompare(bValue)
       } else {
-        return bValue.localeCompare(aValue);
+        return bValue.localeCompare(aValue)
       }
-    });
+    })
 
-    return sorted;
-  }, [users, sortBy]);
+    return sorted
+  }, [users, sortBy])
 
   const filteredUsers = useMemo(() => {
     if (!searchTerm) {
-      return sortedUsers;
+      return sortedUsers
     }
 
-    const normalizedSearch = searchTerm.toLowerCase().trim();
-    return sortedUsers.filter((user) =>
-      user.displayName.toLowerCase().includes(normalizedSearch) ||
-      user.email.toLowerCase().includes(normalizedSearch) ||
-      user.role.toLowerCase().includes(normalizedSearch) ||
-      (user.ativo === 'true' ? 'Sim' : 'Não').toLowerCase().includes(normalizedSearch)
-    );
-  }, [sortedUsers, searchTerm]);
+    const normalizedSearch = searchTerm.toLowerCase().trim()
+    return sortedUsers.filter(
+      (user) =>
+        user.displayName.toLowerCase().includes(normalizedSearch) ||
+        user.email.toLowerCase().includes(normalizedSearch) ||
+        user.role.toLowerCase().includes(normalizedSearch) ||
+        (user.ativo === 'true' ? 'Sim' : 'Não').toLowerCase().includes(normalizedSearch),
+    )
+  }, [sortedUsers, searchTerm])
 
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
+  const paginate = (pageNumber) => setCurrentPage(pageNumber)
 
   const openDeleteModal = (userId) => {
-    setDeleteUserId(userId);
-    setIsDeleteModalOpen(true);
-  };
+    setDeleteUserId(userId)
+    setIsDeleteModalOpen(true)
+  }
 
   const closeDeleteModal = () => {
-    setIsDeleteModalOpen(false);
-    setDeleteUserId(null);
-  };
+    setIsDeleteModalOpen(false)
+    setDeleteUserId(null)
+  }
 
   const deleteUser = async (userId) => {
     try {
-      await axios.delete(`http://localhost:3001/admin/users/${userId}`);
-      const response = await axios.get('http://localhost:3001/admin/users');
-      setUsers(response.data);
-      closeDeleteModal();
+      await axios.delete(`http://localhost:3001/admin/users/${userId}`)
+      const response = await axios.get('http://localhost:3001/admin/users')
+      setUsers(response.data)
+      closeDeleteModal()
     } catch (error) {
-      console.error('Erro ao excluir usuário:', error);
+      console.error('Erro ao excluir usuário:', error)
     }
-  };
+  }
 
   return (
     <Container maxWidth="xl" style={{ paddingTop: '20px' }}>
       <Grid item xs={12}>
         <Paper elevation={2} style={{ padding: '20px', marginBottom: '20px' }}>
-          <Typography variant="h4" gutterBottom>
+          <Breadcrumbs aria-label="breadcrumb">
+            <Typography>Usuários</Typography>
+            <Typography>Listar Usuários</Typography>
+          </Breadcrumbs>
+          <Typography style={{ marginTop: '15px' }} variant="h4" gutterBottom>
             Usuários
           </Typography>
           <Typography variant="body1">Gerencie todos os usuários do site.</Typography>
         </Paper>
       </Grid>
       <StyledPaper elevation={3}>
-        <Typography variant="h5" gutterBottom>Lista de Usuários</Typography>
+        <Typography variant="h5" gutterBottom>
+          Lista de Usuários
+        </Typography>
         <TextField
           label="Pesquisa"
           fullWidth
-          variant='outlined'
+          variant="outlined"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           style={{ marginTop: '5px', marginBottom: '5px' }}
@@ -200,7 +210,11 @@ const Users = () => {
                   <Button component={Link} to={`/admin/users/edit/${user.uid}`} variant="outlined">
                     Editar
                   </Button>
-                  <Button variant="outlined" color="error" onClick={() => openDeleteModal(user.uid)}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => openDeleteModal(user.uid)}
+                  >
                     Excluir
                   </Button>
                 </StyledTableCell>
@@ -211,10 +225,7 @@ const Users = () => {
         <PaginationContainer>
           {Array.from({ length: Math.ceil(filteredUsers.length / usersPerPage) }, (_, i) => (
             <PageNumber key={i}>
-              <PageButton
-                isActive={currentPage === i + 1}
-                onClick={() => paginate(i + 1)}
-              >
+              <PageButton isActive={currentPage === i + 1} onClick={() => paginate(i + 1)}>
                 {i + 1}
               </PageButton>
             </PageNumber>
@@ -228,7 +239,9 @@ const Users = () => {
             <Typography>
               Você está prestes a excluir o usuário:
               <br />
-              <strong>{filteredUsers.find((user) => user.uid === deleteUserId)?.displayName}</strong>
+              <strong>
+                {filteredUsers.find((user) => user.uid === deleteUserId)?.displayName}
+              </strong>
               <br />
               Email: {filteredUsers.find((user) => user.uid === deleteUserId)?.email}
             </Typography>
@@ -245,7 +258,7 @@ const Users = () => {
         </DialogActions>
       </Dialog>
     </Container>
-  );
-};
+  )
+}
 
-export default Users;
+export default Users
