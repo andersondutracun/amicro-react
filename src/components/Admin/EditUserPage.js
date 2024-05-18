@@ -304,7 +304,7 @@ const EditUserPage = () => {
     setLoading(true)
     try {
       const userData = {
-        role: selectedRole, 
+        role: selectedRoles, 
       }
 
       await axios.put(`http://localhost:3001/admin/users/${userId}`, userData)
