@@ -166,7 +166,16 @@ const Users = () => {
           <Typography style={{ marginTop: '15px' }} variant="h4" gutterBottom>
             Usuários
           </Typography>
-          <Typography variant="body1">Gerencie todos os usuários do site.</Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={6}>
+              <Typography variant="body1">Gerencie todos os usuários do site.</Typography>
+            </Grid>
+            <Grid item xs={6} style={{ display: 'flex', justifyContent: 'end' }}>
+              <Button variant="outlined" component={Link} to={`/admin/users/createuser`}>
+                Criar Usuário
+              </Button>
+            </Grid>
+          </Grid>
         </Paper>
       </Grid>
       <StyledPaper elevation={3}>

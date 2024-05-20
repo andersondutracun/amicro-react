@@ -112,7 +112,7 @@ const EditUserPage = () => {
 
   const [servicosInteresse, setServicosInteresse] = useState([])
   const [outrosServicos, setOutrosServicos] = useState('')
-  const [selectedRole, setSelectedRole] = useState('')
+  const [role, setRole] = useState('')
   const [ativo, setAtivo] = useState('');
   const [value, setValue] = React.useState(0);
   const [payments, setPayments] = useState([]);
@@ -187,7 +187,7 @@ const EditUserPage = () => {
           setorAtuacao: userData.empresa.setorAtuacao,
         })
 
-        setSelectedRole(userData.role)
+        setRole(userData.role)
         setSocios(userData.socios)
         setServicosInteresse(userData.servicosInteresse)
         setOutrosServicos(userData.outrosServicos)
@@ -254,6 +254,18 @@ const EditUserPage = () => {
     setSocios(updatedSocios)
   }
 
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+  };
+
+  const handleChangeTaxaAssociacao = (e) => {
+    setTaxaAssociacao(e.target.value);
+  };
+
+  const handleAtivo = (e) => {
+    setAtivo(e.target.value);
+  };
+
   const handleEmpresaChange = (e) => {
     const { name, value } = e.target
     setEmpresa((prevEmpresa) => ({
@@ -266,7 +278,15 @@ const EditUserPage = () => {
     setLoading(true)
     try {
       const userData = {
-
+        empresa,
+        responsavel,
+        email,
+        socios,
+        taxaAssociacao,
+        servicosInteresse,
+        outrosServicos,
+        role,
+        ativo,
       }
 
       await axios.put(`http://localhost:3001/admin/users/${userId}`, userData)
@@ -329,7 +349,8 @@ const EditUserPage = () => {
                   <TextField
                     label="Nome"
                     variant="outlined"
-                    fullWidth name="displayName"
+                    fullWidth
+                    name="nomeCompleto"
                     value={responsavel.nomeCompleto}
                     onChange={handleResponsavelChange}
                   />
@@ -742,7 +763,7 @@ const EditUserPage = () => {
                       fullWidth
                       name="taxaAssociacao"
                       value={taxaAssociacao}
-                      onChange={handleEmpresaChange}
+                      onChange={handleChangeTaxaAssociacao}
                     >
                       <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
                       <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
@@ -839,7 +860,7 @@ const EditUserPage = () => {
                     fullWidth
                     name="email"
                     value={email}
-                    onChange={handleResponsavelChange}
+                    onChange={handleEmailChange}
                   />
                 </Grid>
               </Grid>
@@ -855,8 +876,8 @@ const EditUserPage = () => {
                   <Select
                     variant="outlined"
                     fullWidth
-                    value={selectedRole}
-                    onChange={(e) => setSelectedRole(e.target.value)}
+                    value={role}
+                    onChange={(e) => setRole(e.target.value)}
                   >
                     <MenuItem value="Associado">Associado</MenuItem>
                     <MenuItem value="Marketing">Marketing</MenuItem>
@@ -878,11 +899,11 @@ const EditUserPage = () => {
                     variant="outlined"
                     fullWidth
                     name="status"
-                    value={ativo === 'true' ? 'Ativo' : 'Inativo'}
-                    onChange={handleResponsavelChange}
+                    value={ativo === 'true' ? 'true' : 'false'}
+                    onChange={handleAtivo}
                   >
-                    <MenuItem value="Ativo">Ativo</MenuItem>
-                    <MenuItem value="Inativo">Inativo</MenuItem>
+                    <MenuItem value="true">Ativo</MenuItem>
+                    <MenuItem value="false">Inativo</MenuItem>
                   </Select>
                 </Grid>
               </Grid>

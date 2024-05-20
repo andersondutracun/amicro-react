@@ -102,51 +102,41 @@ app.delete('/admin/users/:userId', async (req, res) => {
   }
 })
 
+function removeUndefined(obj) {
+  if (Array.isArray(obj)) {
+    return obj.map((item) => removeUndefined(item))
+  } else if (typeof obj === 'object' && obj !== null) {
+    return Object.fromEntries(
+      Object.entries(obj)
+        .filter(([_, v]) => v !== undefined)
+        .map(([k, v]) => [k, removeUndefined(v)]),
+    )
+  } else {
+    return obj
+  }
+}
+
 // Rota para atualizar um usuário
 app.put('/admin/users/:userId', async (req, res) => {
-  const userId = req.params.userId
-  const {
-    displayName,
-    email,
-    role,
-    birthdate,
-    cep,
-    address,
-    bairro,
-    cidade,
-    estado,
-    number,
-    phoneNumber,
-  } = req.body
+  const { userId } = req.params
+  const userData = req.body
+
   try {
-    // Verificar se o usuário já existe no Firestore
-    const userDocRef = db.collection('users').doc(userId)
-    const userDocSnap = await userDocRef.get()
+    // Remover valores `undefined`
+    const cleanedUserData = removeUndefined(userData)
 
-    if (!userDocSnap.exists) {
-      // Se o documento do usuário não existir, retorna um erro
-      return res.status(404).json({ error: 'Usuário não encontrado' })
-    }
+    // Atualizar dados no Firestore
+    await admin.firestore().collection('empresas').doc(userId).update(cleanedUserData)
 
-    // Atualizar os dados do usuário
-    await userDocRef.update({
-      displayName,
-      email,
-      role,
-      birthdate,
-      cep,
-      address,
-      bairro,
-      cidade,
-      estado,
-      number,
-      phoneNumber,
+    // Atualizar email no Firebase Authentication
+    await admin.auth().updateUser(userId, {
+      email: cleanedUserData.email,
     })
 
-    res.status(200).json({ message: 'Usuário atualizado com sucesso' })
+    res.status(200).send('User updated successfully')
   } catch (error) {
-    console.error('Erro ao editar usuário:', error)
-    res.status(500).json({ error: 'Erro ao editar usuário' })
+    console.error('Error updating user:', error)
+    res.status(500).send('Error updating user')
   }
 })
 
