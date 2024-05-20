@@ -22,7 +22,7 @@ import {
 import styled from 'styled-components'
 import { TableBody } from 'flowbite-react'
 import { useFetchDocument } from '../../hooks/useFetchDocument'
-import { db } from '../../firebase/config'
+import PaymentsUser from './PaymentsUser'
 
 const StyledPaper = styled(Paper)`
   padding: 20px;
@@ -158,44 +158,6 @@ const EditUserPage = () => {
   }
 
   useEffect(() => {
-    if (userData && userData.taxaAssociacao) {
-      setTaxaAssociacao(userData.taxaAssociacao);
-
-      // Função para buscar os pagamentos do usuário
-      const fetchUserPayments = async () => {
-        try {
-          const paymentsRef = db.collection('payments');
-          const snapshot = await paymentsRef.where('uid', '==', userId).get();
-
-          const userPayments = [];
-          snapshot.forEach((doc) => {
-            const paymentData = doc.data();
-            userPayments.push(paymentData);
-          });
-
-          // Atualiza os pagamentos com os dados obtidos do Firestore
-          if (userPayments.length > 0) {
-            const updatedPayments = payments.map((payment, index) => {
-              const matchingPayment = userPayments.find((p) => p.payment === index + 1); // Procura o pagamento correspondente na coleção
-              if (matchingPayment) {
-                return { ...payment, paidAt: matchingPayment.paidAt };
-              }
-              return payment;
-            });
-
-            setPayments(updatedPayments);
-          }
-        } catch (error) {
-          console.error('Erro ao buscar pagamentos:', error);
-        }
-      };
-
-      // Chama a função para buscar os pagamentos do usuário
-      fetchUserPayments();
-    }
-  }, [userData, taxaAssociacao, userId]);
-
-  useEffect(() => {
     const fetchUser = async () => {
       setLoading(true)
       try {
@@ -304,7 +266,7 @@ const EditUserPage = () => {
     setLoading(true)
     try {
       const userData = {
-        role: selectedRoles, 
+
       }
 
       await axios.put(`http://localhost:3001/admin/users/${userId}`, userData)
@@ -774,60 +736,22 @@ const EditUserPage = () => {
                 <Typography variant="h5" gutterBottom>
                   Taxa de Associação
                 </Typography>
-                <Grid container spacing={2} style={{ marginBottom: "15px"}}>
+                <Grid container spacing={2} style={{ marginBottom: '15px' }}>
                   <Grid item xs={12} lg={4} sm={6}>
-                      <Select
-                        label="Taxa de Associação"
-                        variant="outlined"
-                        fullWidth
-                        name="taxaAssociacao"
-                        value={taxaAssociacao}
-                        onChange={handleEmpresaChange}
-                      >
-                        <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
-                        <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
-                        <MenuItem value="Anual">Anual R$ 300,00</MenuItem>
-                      </Select>
+                    <Select
+                      fullWidth
+                      name="taxaAssociacao"
+                      value={taxaAssociacao}
+                      onChange={handleEmpresaChange}
+                    >
+                      <MenuItem value="Mensal">Mensal R$ 50,00</MenuItem>
+                      <MenuItem value="Semestral">Semestral R$ 210,00</MenuItem>
+                      <MenuItem value="Anual">Anual R$ 300,00</MenuItem>
+                    </Select>
                   </Grid>
                 </Grid>
               </Box>
-              <Grid container spacing={2} style={{ marginBottom: "15px" }}>
-                <Grid item xs={12} lg={12} sm={12}>
-                  <Typography variant="h6" color="initial" display="flex" justifyContent="center">
-                    Pagamentos
-                  </Typography>
-                  <Table>
-                    <TableHead>
-                      <TableRow>
-                        <TableCell>Mês</TableCell>
-                        <TableCell>Data de Validade</TableCell>
-                        <TableCell>Status do Pagamento</TableCell>
-                        <TableCell>Data de Pagamento</TableCell>
-                      </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {payments.map((payment, index) => (
-                        <TableRow key={index}>
-                          <TableCell>{payment.month}</TableCell>
-                          <TableCell>{payment.validade}</TableCell>
-                          <TableCell>
-                            {payment.paid ? (
-                              <Button variant="contained" disabled>
-                                Pago
-                              </Button>
-                            ) : (
-                              <Button variant="contained" color="primary">
-                                Pagar
-                              </Button>
-                            )}
-                          </TableCell>
-                          <TableCell>{payment.paidAt ? new Date(payment.paidAt).toLocaleDateString() : 'Não pago'}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </Grid>
-              </Grid>
+              <PaymentsUser userid={userId} taxa={taxaAssociacao} />
             </StyledPaper>
           </CustomTabPanel>
           <CustomTabPanel value={value} index={4}>
@@ -838,52 +762,49 @@ const EditUserPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} lg={12} sm={6}>
                   <Select
-                    multiple={true}
+                    multiple
                     native
                     fullWidth
                     name="servicosInteresse"
-                    value={servicosInteresse}
+                    value={servicosInteresse} // Substitua 'userServices' pelos serviços obtidos do banco de dados para o usuário
                     onChange={handleServicosInteresseChange}
                   >
-                    <MenuItem value="descontos_em_educacao_superior">
-                      Descontos em Educação superior
-                    </MenuItem>
-                    <MenuItem value="descontos_em_educacao_superior">
+                    <option value="descontos_em_educacao_superior">
                   Descontos em Educação superior
-                    </MenuItem>
-                    <MenuItem value="cursos_de_qualificacao_empresarial">
+                </option>
+                <option value="cursos_de_qualificacao_empresarial">
                   Cursos de qualificação empresarial
-                    </MenuItem>
-                    <MenuItem value="cursos_de_qualificacao_dos_funcionarios">
+                </option>
+                <option value="cursos_de_qualificacao_dos_funcionarios">
                   Cursos de qualificação dos funcionários
-                    </MenuItem>
-                    <MenuItem value="palestras_empresariais">Palestras empresariais</MenuItem>
-                    <MenuItem value="palestras_para_os_funcionarios">
+                </option>
+                <option value="palestras_empresariais">Palestras empresariais</option>
+                <option value="palestras_para_os_funcionarios">
                   Palestras para os funcionarios
-                    </MenuItem>
-                    <MenuItem value="consultoria_contabil">Consultoria contábil</MenuItem>
-                    <MenuItem value="consultoria_financeira">Consultoria financeira</MenuItem>
-                    <MenuItem value="consultoria_de_rh">Consultoria de RH</MenuItem>
-                    <MenuItem value="recrutamento_de_pessoas">Recrutamento de pessoas</MenuItem>
-                    <MenuItem value="consultoria_vendas">Consultoria vendas</MenuItem>
-                    <MenuItem value="consultoria_em_gestao">Consultoria em gestão</MenuItem>
-                    <MenuItem value="consultoria_em_tecnologia">Consultoria em tecnologia</MenuItem>
+                </option>
+                <option value="consultoria_contabil">Consultoria contábil</option>
+                <option value="consultoria_financeira">Consultoria financeira</option>
+                <option value="consultoria_de_rh">Consultoria de RH</option>
+                <option value="recrutamento_de_pessoas">Recrutamento de pessoas</option>
+                <option value="consultoria_vendas">Consultoria vendas</option>
+                <option value="consultoria_em_gestao">Consultoria em gestão</option>
+                <option value="consultoria_em_tecnologia">Consultoria em tecnologia</option>
 
-                    <MenuItem value="consultoria_em_marketing">Consultoria em Marketing</MenuItem>
-                    <MenuItem value="consultoria_em_midias_sociais">Consultoria em mídias sociais</MenuItem>
-                    <MenuItem value="consultoria_em_exportacao_ou_importacao">
+                <option value="consultoria_em_marketing">Consultoria em Marketing</option>
+                <option value="consultoria_em_midias_sociais">Consultoria em mídias sociais</option>
+                <option value="consultoria_em_exportacao_ou_importacao">
                   Consultoria em exportação ou importação
-                    </MenuItem>
-                    <MenuItem value="plano_de_saude">Plano de saúde</MenuItem>
-                    <MenuItem value="plano_de_saude_mental">Plano de saúde bucal</MenuItem>
-                    <MenuItem value="atendimento_em_saude_mental">Atendimento em saúde mental</MenuItem>
-                    <MenuItem value="intermediacao_de_negocios">Intermediação de negócios</MenuItem>
-                    <MenuItem value="networking_entre_empresas">Networking entre empresas</MenuItem>
-                    <MenuItem value="consultoria_juridica">Consultoria jurídica</MenuItem>
-                    <MenuItem value="consultoria_tributaria">Consultoria tributaria</MenuItem>
-                    <MenuItem value="coaching_para_gestores">Coaching para Gestores</MenuItem>
-                    <MenuItem value="mentoria_empresarial">Mentoria Empresarial</MenuItem>
-                    <MenuItem value="outros">Outros</MenuItem>
+                </option>
+                <option value="plano_de_saude">Plano de saúde</option>
+                <option value="plano_de_saude_mental">Plano de saúde bucal</option>
+                <option value="atendimento_em_saude_mental">Atendimento em saúde mental</option>
+                <option value="intermediacao_de_negocios">Intermediação de negócios</option>
+                <option value="networking_entre_empresas">Networking entre empresas</option>
+                <option value="consultoria_juridica">Consultoria jurídica</option>
+                <option value="consultoria_tributaria">Consultoria tributaria</option>
+                <option value="coaching_para_gestores">Coaching para Gestores</option>
+                <option value="mentoria_empresarial">Mentoria Empresarial</option>
+                <option value="outros">Outros</option>
                   </Select>
                 </Grid>
                 <Grid item xs={12} lg={12} sm={6}>
@@ -932,7 +853,6 @@ const EditUserPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} lg={4} sm={6}>
                   <Select
-                    label="Cargo"
                     variant="outlined"
                     fullWidth
                     value={selectedRole}
@@ -955,25 +875,20 @@ const EditUserPage = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12} lg={4} sm={6}>
                   <Select
-                    label="Status"
                     variant="outlined"
                     fullWidth
                     name="status"
-                    value={ativo === 'true' ? 'Sim' : 'Não'}
+                    value={ativo === 'true' ? 'Ativo' : 'Inativo'}
                     onChange={handleResponsavelChange}
                   >
-                    <MenuItem value="Sim">Sim</MenuItem>
-                    <MenuItem value="Não">Não</MenuItem>
+                    <MenuItem value="Ativo">Ativo</MenuItem>
+                    <MenuItem value="Inativo">Inativo</MenuItem>
                   </Select>
                 </Grid>
               </Grid>
             </StyledPaper>
           </CustomTabPanel>
         </Box>
-        
-        
-        
-
         <Button variant="contained" color="primary" onClick={handleUpdateUser} style={{ marginTop: "10px" }}>
           Salvar
         </Button>

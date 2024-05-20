@@ -340,43 +340,6 @@ app.get('/countMaterials', async (req, res) => {
   }
 })
 
-app.post('/admin/monthlyPayments', async (req, res) => {
-  const { year, month } = req.body // Ano e mês dos pagamentos a serem calculados
-
-  try {
-    // Consultar os pagamentos do mês e ano especificados
-    const paymentsRef = collection(db, 'payments')
-    const q = query(
-      paymentsRef,
-      where('payment', '==', true), // Considerar apenas pagamentos confirmados
-      where('year', '==', year), // Filtrar pelo ano especificado
-      where('month', '==', month), // Filtrar pelo mês especificado
-    )
-    const snapshot = await getDocs(q)
-
-    let totalPayments = 0
-
-    snapshot.forEach((doc) => {
-      const payment = doc.data()
-      totalPayments += payment.value
-    })
-
-    const monthlyPaymentsDocRef = doc(db, 'monthlyPayments', `${year}-${month}`)
-    await setDoc(monthlyPaymentsDocRef, {
-      year,
-      month,
-      totalPayments,
-    })
-
-    res
-      .status(200)
-      .json({ message: `Pagamentos do mês ${month}/${year} calculados e salvos com sucesso.` })
-  } catch (error) {
-    console.error('Erro ao calcular e salvar os pagamentos mensais:', error)
-    res.status(500).json({ error: 'Erro ao calcular e salvar os pagamentos mensais' })
-  }
-})
-
 app.get('/countViews', async (req, res) => {
   try {
     const viewsSnapshot = await db.collection('views').get()
@@ -396,6 +359,29 @@ app.post('/recordView', async (req, res) => {
   } catch (error) {
     console.error('Erro ao registrar visualização:', error)
     res.status(500).json({ error: 'Erro ao registrar visualização' })
+  }
+})
+
+app.get('/api/payments/:userid', async (req, res) => {
+  const { userid } = req.params
+
+  try {
+    const paymentsRef = db.collection('payments')
+    const snapshot = await paymentsRef.where('uid', '==', userid).get()
+
+    if (snapshot.empty) {
+      return res.status(404).send('No matching documents.')
+    }
+
+    const payments = []
+    snapshot.forEach((doc) => {
+      payments.push({ id: doc.id, ...doc.data() })
+    })
+
+    res.json(payments)
+  } catch (error) {
+    console.error('Error fetching payments:', error)
+    res.status(500).send('Internal Server Error')
   }
 })
 
